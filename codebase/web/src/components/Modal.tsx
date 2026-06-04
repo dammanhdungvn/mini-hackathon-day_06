@@ -150,7 +150,7 @@ export default function Modal({ type, onClose, activeHotel }: ModalProps) {
           {type === 'settings' && (
             <div id="modal-settings-case" className="space-y-4">
               <p className="text-xs text-gray-500 leading-relaxed">
-                Voyage Intelligence đang chạy theo luồng test AI: Vite middleware đọc backend/.env, đọc system_promts.txt, gọi tool fetch_matching_hotels trong backend rồi gửi tool result sang Alibaba để AI trả lời khách hàng.
+                Voyage Intelligence đang chạy theo luồng test AI: Vite middleware đọc backend/.env, đọc system_prompts.txt, gọi tool fetch_matching_hotels trong backend rồi gửi tool result sang Alibaba để AI trả lời khách hàng.
               </p>
 
               <div className="space-y-3.5">
@@ -177,7 +177,7 @@ export default function Modal({ type, onClose, activeHotel }: ModalProps) {
                 <div className="space-y-1.5">
                   <span className="block text-[11px] font-bold text-gray-400 uppercase tracking-wider">System prompt được nạp</span>
                   <div className="p-3 bg-gray-900 text-amber-200 rounded-xl font-mono text-[10px] leading-relaxed max-h-36 overflow-y-auto">
-                    {`system_promts.txt -> backend/aiAdvisor.ts -> Alibaba. Tool fetch_matching_hotels được chạy trước hoặc theo tool call của model, rồi AI trả lời dựa trên tool result.`}
+                    {`system_prompts.txt -> backend/aiAdvisor.ts -> Alibaba. Tool fetch_matching_hotels được chạy trước hoặc theo tool call của model, rồi AI trả lời dựa trên tool result.`}
                   </div>
                 </div>
               </div>

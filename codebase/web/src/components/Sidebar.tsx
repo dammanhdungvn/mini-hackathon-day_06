@@ -214,7 +214,7 @@ export default function Sidebar({
             
             <div className="flex items-center gap-2 text-[11px] text-gray-500">
               <Wifi className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
-              <span>Đọc system_promts.txt, gọi tool fetch_matching_hotels rồi gửi context cho AI.</span>
+              <span>Đọc system_prompts.txt, gọi tool fetch_matching_hotels rồi gửi context cho AI.</span>
             </div>
           </div>
         </div>

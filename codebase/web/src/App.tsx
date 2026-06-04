@@ -176,7 +176,7 @@ export default function App() {
           <div id="admin-mode-banner" className="bg-[#0b1c30] text-amber-200 px-8 py-2.5 flex items-center justify-between text-xs shrink-0 select-none animate-slide-down">
             <div className="flex items-center gap-2 font-mono">
               <Shield className="w-4 h-4 text-amber-400" />
-              <span>[ADMIN PORTAL] Đang test Alibaba tool-calling với system prompt từ file system_promts.txt.</span>
+              <span>[ADMIN PORTAL] Đang test Alibaba tool-calling với system prompt từ file system_prompts.txt.</span>
             </div>
             <button 
               onClick={() => setViewMode('user')}

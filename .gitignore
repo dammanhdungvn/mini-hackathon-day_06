@@ -1,7 +1,28 @@
-report_Tung.md
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+build/
+coverage/
+
+# Environment files
 .env
-.venv/
-backend/.env
-backend/*.log
-*.pyc
+.env.local
+codebase/backend/.env
+
+# Python
 __pycache__/
+*.pyc
+*.pyo
+.venv/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# IDE / AI tool configs (keep in repo for team)
+# .agent/ .claude/ .codex/ .cursor/

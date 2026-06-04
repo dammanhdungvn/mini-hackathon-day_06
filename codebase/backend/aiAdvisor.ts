@@ -54,7 +54,7 @@ const BACKEND_DIR = path.dirname(__filename);
 const PROJECT_ROOT = path.dirname(BACKEND_DIR);
 
 const DATA_FILE = path.join(PROJECT_ROOT, 'data_hotel.py');
-const SYSTEM_PROMPT_FILE = path.join(PROJECT_ROOT, 'system_promts.txt');
+const SYSTEM_PROMPT_FILE = path.join(PROJECT_ROOT, 'system_prompts.txt');
 const DEMO_CASES_FILE = path.join(BACKEND_DIR, 'demo_cases.json');
 const HOTEL_IMAGES_FILE = path.join(BACKEND_DIR, 'hotel_images.json');
 
