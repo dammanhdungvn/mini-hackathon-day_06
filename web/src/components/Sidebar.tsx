@@ -14,8 +14,7 @@ import {
   User,
   Shield,
   Clock,
-  Wifi,
-  WifiOff
+  Wifi
 } from 'lucide-react';
 import { ViewMode, DemoCase } from '../types';
 
@@ -24,8 +23,6 @@ interface SidebarProps {
   setViewMode: (mode: ViewMode) => void;
   activeDemo: DemoCase;
   triggerDemo: (demo: DemoCase) => void;
-  isAiConnected: boolean;
-  setIsAiConnected: (conn: boolean) => void;
   clearChat: () => void;
   onOpenSettings: () => void;
   onOpenHelp: () => void;
@@ -36,8 +33,6 @@ export default function Sidebar({
   setViewMode,
   activeDemo,
   triggerDemo,
-  isAiConnected,
-  setIsAiConnected,
   clearChat,
   onOpenSettings,
   onOpenHelp
@@ -179,42 +174,23 @@ export default function Sidebar({
               Trạng thái kết nối
             </h3>
             <span className={`text-[9px] px-2 py-0.5 rounded-full font-bold ${
-              isAiConnected ? 'bg-emerald-100 text-emerald-800' : 'bg-sky-100 text-sky-800'
+              'bg-emerald-100 text-emerald-800'
             }`}>
-              {isAiConnected ? 'CONNECTED' : 'MOCK MODE'}
+              QWEN3-MAX
             </span>
           </div>
 
           <div className="p-4 bg-[#f8f9ff] rounded-xl border border-[#e5eeff] space-y-3">
             <div className="flex items-center justify-between">
-              <span className="text-xs text-gray-600 font-medium">Bật Live AI (Gemini 3.5)</span>
-              <button
-                id="toggle-ai-conn"
-                onClick={() => setIsAiConnected(!isAiConnected)}
-                className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-                  isAiConnected ? 'bg-[#14B8A6]' : 'bg-gray-300'
-                }`}
-              >
-                <span
-                  className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
-                    isAiConnected ? 'translate-x-5' : 'translate-x-0'
-                  }`}
-                />
-              </button>
+              <span className="text-xs text-gray-600 font-medium">Alibaba Model Studio</span>
+              <span className="text-[10px] bg-[#14B8A6]/10 text-[#0f766e] font-bold px-2 py-1 rounded-full">
+                Required
+              </span>
             </div>
             
             <div className="flex items-center gap-2 text-[11px] text-gray-500">
-              {isAiConnected ? (
-                <>
-                  <Wifi className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
-                  <span>Luồng Gemini chạy qua server local.</span>
-                </>
-              ) : (
-                <>
-                  <WifiOff className="w-3.5 h-3.5 text-sky-500 shrink-0" />
-                  <span>Chế độ giả lập phản hồi tự động thông minh.</span>
-                </>
-              )}
+              <Wifi className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+              <span>Bắt buộc dùng API Alibaba `qwen3-max` để trả lời khách hàng.</span>
             </div>
           </div>
         </div>

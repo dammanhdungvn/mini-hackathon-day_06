@@ -2,5 +2,5 @@
   "name": "Voyage Intelligence",
   "description": "Premium AI Hotel Advisor customized for Vietnamese resorts and high-fidelity trip itinerary match planning.",
   "requestFramePermissions": [],
-  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_MODEL_API"]
 }

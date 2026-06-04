@@ -1,0 +1,38 @@
+{
+  "happy": {
+    "trip": {
+      "destination": "Phú Quốc",
+      "budget": "2.0M VND / đêm",
+      "budgetVal": 2000,
+      "guests": 2,
+      "travelStyle": "Yên tĩnh, cặp đôi",
+      "preference": "Sát bãi biển, nghỉ dưỡng"
+    },
+    "analysis": "Tìm thấy các khách sạn phù hợp tại Phú Quốc theo ngân sách và phong cách nghỉ dưỡng đã chọn.",
+    "messages": []
+  },
+  "error": {
+    "trip": {
+      "destination": "",
+      "budget": "Chưa xác định",
+      "budgetVal": 0,
+      "guests": 1,
+      "travelStyle": "Nhộn nhịp",
+      "preference": "Gần trung tâm mua sắm"
+    },
+    "analysis": "Thông tin hành trình chưa đủ. Hãy bổ sung điểm đến và ngân sách để hệ thống đề xuất chính xác hơn.",
+    "messages": []
+  },
+  "low_confidence": {
+    "trip": {
+      "destination": "Phú Quốc",
+      "budget": "0.8M VND / đêm",
+      "budgetVal": 800,
+      "guests": 2,
+      "travelStyle": "Sang trọng bậc nhất",
+      "preference": "Resort 5 sao siêu sang, bãi biển riêng biệt lập"
+    },
+    "analysis": "Có mâu thuẫn giữa ngân sách tiết kiệm và yêu cầu resort siêu sang.",
+    "messages": []
+  }
+}

@@ -1,37 +1,66 @@
 # AI Hotel Advisor - Demo Local
 
-Demo này tập trung vào giao diện và luồng xử lý nội bộ cho AI Hotel Advisor. Hiện tại chưa cần tách thành tài liệu API riêng; chỉ cần chạy app trong thư mục `web` là có thể mở giao diện, nhập thông tin chuyến đi, xem danh sách khách sạn và chat ở chế độ mock/local.
+Kiến trúc hiện tại:
 
-Backend Python trong thư mục `backend` chỉ là phần tham khảo để mở rộng sau. Luồng demo hiện tại chạy trực tiếp trong `web/server.ts`.
+- `web`: chỉ giữ giao diện React và server proxy nhẹ.
+- `backend`: xử lý dữ liệu khách sạn, gọi tool `fetch_matching_hotels`, tạo prompt và gọi Alibaba Model Studio.
+- Chat bắt buộc dùng API Alibaba `qwen3-max`. Không có mock reply khi thiếu key.
 
-## Cấu trúc chính
+## Cấu trúc
 
 ```text
 mini-hackathon-day_06/
-|-- README.md
-|-- data_hotel.py          # Dữ liệu khách sạn Phú Quốc
-|-- system_promts.txt      # Prompt hệ thống cho AI
-|-- backend/               # Backend Python tham khảo
+|-- data_hotel.py
+|-- system_promts.txt
+|-- backend/
 |   |-- main.py
 |   |-- tools.py
-|   |-- requirements.txt
-|   `-- .env.example
-`-- web/                   # App chính để chạy demo
-    |-- server.ts          # Server local kết nối UI với luồng xử lý
-    |-- package.json
+|   |-- .env
+|   |-- .env.example
+|   `-- requirements.txt
+`-- web/
+    |-- server.ts
+    |-- .env
     |-- .env.example
-    `-- src/               # React UI
+    |-- package.json
+    `-- src/
 ```
 
-## Yêu cầu
+## 1. Cấu Hình API Key
 
-- Node.js 18 trở lên.
-- Python 3.12 chỉ cần dùng khi muốn chạy backend Python tùy chọn.
-- Gemini API key chỉ cần dùng khi muốn bật Live AI.
+Paste key vào `backend\.env`:
 
-## Chạy demo giao diện
+```env
+DASHSCOPE_API_KEY=YOUR_REAL_KEY_HERE
+DASHSCOPE_BASE_URL=https://ws-7z0pgh6qqcnccram.ap-southeast-1.maas.aliyuncs.com/compatible-mode/v1
+DASHSCOPE_MODEL=qwen3-max
+```
 
-Từ thư mục dự án:
+`web\.env` chỉ cần trỏ về backend:
+
+```env
+BACKEND_URL=http://127.0.0.1:8000
+APP_URL=http://localhost:3000
+```
+
+## 2. Chạy Backend
+
+```powershell
+cd D:\day6\mini-hackathon-day_06
+.\.venv\Scripts\python.exe -m pip install -r backend\requirements.txt
+.\.venv\Scripts\python.exe -m uvicorn backend.main:app --host 127.0.0.1 --port 8000
+```
+
+Nếu chưa có `.venv`:
+
+```powershell
+py -3.12 -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -r backend\requirements.txt
+```
+
+## 3. Chạy Web
+
+Mở terminal khác:
 
 ```powershell
 cd D:\day6\mini-hackathon-day_06\web
@@ -39,127 +68,25 @@ npm install
 npm run dev
 ```
 
-Mở trình duyệt:
+Mở:
 
 ```text
 http://localhost:3000
 ```
 
-Với cách chạy này, app đã đủ để demo giao diện. Nếu chưa cấu hình Gemini hoặc chưa chạy backend Python, hệ thống tự dùng mock/local fallback.
+## Luồng Xử Lý
 
-## Cấu hình Live AI trong web
+1. React UI gọi `web/server.ts`.
+2. `web/server.ts` proxy request sang backend qua `BACKEND_URL`.
+3. Backend dùng `fetch_matching_hotels` trong `backend/tools.py` để lấy dữ liệu khách sạn.
+4. Backend đưa kết quả tool vào prompt.
+5. Backend gọi Alibaba Model Studio endpoint `/chat/completions` với model `qwen3-max`.
+6. Kết quả trả về UI.
 
-Nếu muốn thử Gemini ngay trong luồng web:
+## Lưu Ý
 
-```powershell
-cd D:\day6\mini-hackathon-day_06\web
-Copy-Item .env.example .env
-```
-
-Sửa `web\.env`:
-
-```env
-GEMINI_API_KEY="your_gemini_api_key_here"
-APP_URL="http://localhost:3000"
-```
-
-Sau đó chạy lại:
-
-```powershell
-npm run dev
-```
-
-Nếu không có key, cứ để mặc định. Demo vẫn chạy bằng mock mode.
-
-## Backend Python tham khảo
-
-Chỉ chạy phần này nếu muốn kiểm thử riêng luồng Python + Gemini tool calling. App web hiện tại không phụ thuộc vào bước này.
-
-Từ thư mục gốc:
-
-```powershell
-cd D:\day6\mini-hackathon-day_06
-py -3.12 -m venv .venv
-.\.venv\Scripts\Activate.ps1
-pip install -r backend\requirements.txt
-Copy-Item backend\.env.example backend\.env
-```
-
-Sửa `backend\.env`:
-
-```env
-GEMINI_API_KEY=your_gemini_api_key_here
-GEMINI_MODEL=gemini-2.5-flash
-```
-
-Chạy backend:
-
-```powershell
-.\.venv\Scripts\python.exe -m uvicorn backend.main:app --host 127.0.0.1 --port 8000
-```
-
-Lưu ý: đây là luồng kiểm thử riêng. Demo giao diện vẫn chạy bằng `web/server.ts` và không cần bật backend Python.
-
-## Chỉnh giao diện
-
-Các file cần sửa nhiều nhất khi chỉnh UI:
-
-- `web\src\App.tsx`: layout chính và state của app.
-- `web\src\components\Sidebar.tsx`: thanh điều khiển demo.
-- `web\src\components\TripSummaryCard.tsx`: form thông tin chuyến đi.
-- `web\src\components\HotelMatches.tsx`: danh sách khách sạn phù hợp.
-- `web\src\components\AIChat.tsx`: khung chat.
-- `web\src\index.css`: style global.
-
-Sau khi sửa, Vite sẽ tự reload trình duyệt khi đang chạy `npm run dev`.
-
-## Chỉnh dữ liệu và prompt
-
-- Sửa `data_hotel.py` nếu muốn đổi danh sách khách sạn.
-- Sửa `system_promts.txt` nếu muốn đổi giọng văn, luật trả lời hoặc guardrail của AI.
-- Sửa `backend\tools.py` nếu muốn đổi cách lọc khách sạn trong luồng Python tùy chọn.
-- Sửa `web\server.ts` nếu muốn đổi mock response hoặc fallback logic đang phục vụ demo.
-
-## Script hữu ích
-
-Trong `web`:
-
-```powershell
-npm run dev      # chạy demo local
-npm run build    # build production
-npm run start    # chạy bản build
-npm run lint     # kiểm tra TypeScript
-```
-
-Trong thư mục gốc, kiểm tra Python backend nếu cần:
-
-```powershell
-.\.venv\Scripts\python.exe -m compileall backend data_hotel.py
-```
-
-## Lỗi thường gặp
-
-Nếu `http://localhost:3000` không mở được:
-
-```powershell
-cd D:\day6\mini-hackathon-day_06\web
-npm install
-npm run dev
-```
-
-Nếu port `3000` đang bị chiếm:
-
-```powershell
-netstat -ano | Select-String ":3000"
-```
-
-Nếu Live AI không trả lời:
-
-- Kiểm tra `GEMINI_API_KEY` trong `web\.env` hoặc `backend\.env`.
-- Nếu chỉ cần demo UI, tắt Live AI hoặc để hệ thống dùng mock mode.
-
-## Ghi chú
-
-- Không commit `.env` hoặc API key.
-- Với mục tiêu chỉnh giao diện, chỉ cần tập trung vào thư mục `web`.
-- Phần `backend` có thể giữ lại để mở rộng sau, nhưng không bắt buộc cho demo UI hiện tại.
+- Không có API key thì chat trả lỗi cấu hình, không trả lời giả.
+- Không paste key vào code.
+- Chỉ chỉnh giao diện trong `web/src`.
+- Chỉnh logic tool trong `backend/tools.py`.
+- Chỉnh prompt/provider trong `backend/main.py`.

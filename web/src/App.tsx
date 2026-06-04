@@ -1,18 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  Building2, 
-  MapPin, 
-  Star, 
-  TrendingUp, 
-  Award, 
-  Globe, 
-  MessageSquare, 
-  ChevronRight,
-  Shield,
-  Eye,
-  Settings,
-  Sparkles
-} from 'lucide-react';
+import { Shield, Sparkles } from 'lucide-react';
 
 import Sidebar from './components/Sidebar';
 import Header from './components/Header';
@@ -23,49 +10,31 @@ import Modal from './components/Modal';
 
 import { TripInfo, Hotel, Message, ViewMode, DemoCase } from './types';
 
-const LOCAL_HAPPY_CASE = {
-  trip: {
-    destination: 'Phú Quốc',
-    budget: '2.0M VND / đêm',
-    budgetVal: 2000,
-    guests: 2,
-    travelStyle: 'Yên tĩnh, cặp đôi',
-    preference: 'Sát bãi biển, nghỉ dưỡng'
-  },
-  analysis: 'Tìm thấy các khách sạn phù hợp tại Phú Quốc. Top lựa chọn dưới đây được chọn lọc dựa trên phong cách yên tĩnh sát biển và ngân sách của bạn.',
-  messages: [
-    {
-      id: 'h1',
-      sender: 'user',
-      text: 'Tôi đi Phú Quốc 2 người, ngân sách 2 triệu mỗi đêm, muốn gần biển và yên tĩnh.',
-      timestamp: '10:42'
-    },
-    {
-      id: 'h2',
-      sender: 'assistant',
-      text: `Chào bạn! Mình đã tìm thấy các khách sạn ở Phú Quốc đáp ứng các yêu cầu của bạn: sát biển, không gian yên tĩnh và trong tầm giá 2 triệu VNĐ.\n\nNổi bật nhất là **SOL by Meliá** với bãi biển riêng tuyệt đẹp (giá 1.8M/đêm, match 95%). Ngoài ra, **Lahana Resort** (1.6M/đêm, match 90%) cũng rất phù hợp nếu bạn yêu thích không gian xanh sườn đồi và hồ bơi vô cực ngắm hoàng hôn ngút ngàn.\n\nBạn muốn tìm hiểu kỹ hơn hay đặt phòng của resort nào trong số này ạ?`,
-      timestamp: '10:43'
-    }
-  ]
+const EMPTY_TRIP: TripInfo = {
+  destination: '',
+  budget: 'Chưa xác định',
+  budgetVal: 0,
+  guests: 1,
+  travelStyle: '',
+  preference: '',
 };
 
 export default function App() {
   // Core Application Layout States
   const [viewMode, setViewMode] = useState<ViewMode>('user');
   const [activeDemo, setActiveDemo] = useState<DemoCase>('happy');
-  const [isAiConnected, setIsAiConnected] = useState<boolean>(true);
   
   // Trip & matching hotel list state
-  const [trip, setTrip] = useState<TripInfo>(LOCAL_HAPPY_CASE.trip);
+  const [trip, setTrip] = useState<TripInfo>(EMPTY_TRIP);
   const [matchedHotels, setMatchedHotels] = useState<Hotel[]>([]);
-  const [analysisText, setAnalysisText] = useState<string>(LOCAL_HAPPY_CASE.analysis);
+  const [analysisText, setAnalysisText] = useState<string>('Đang tải dữ liệu demo từ backend...');
   
   // Chat context state
-  const [messages, setMessages] = useState<Message[]>(LOCAL_HAPPY_CASE.messages);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [isGenerating, setIsGenerating] = useState<boolean>(false);
 
   // Cached demo cases loaded from the local server.
-  const [demoCases, setDemoCases] = useState<any>({ happy: LOCAL_HAPPY_CASE });
+  const [demoCases, setDemoCases] = useState<any>({});
 
   // Modals state
   const [modalType, setModalType] = useState<'book' | 'details' | 'settings' | 'help' | null>(null);
@@ -86,7 +55,10 @@ export default function App() {
           }
         }
       })
-      .catch(err => console.warn('Demo cases load failed, using local backup'));
+      .catch(err => {
+        console.warn('Demo cases load failed:', err);
+        setAnalysisText('Chưa kết nối được backend. Hãy chạy FastAPI server ở cổng 8000.');
+      });
   }, []);
 
   // Recalculate matched hotels on trip change
@@ -147,7 +119,7 @@ export default function App() {
     }
   };
 
-  // Sends messages to the local chat flow or smart mock.
+  // Sends messages to Alibaba-backed local chat flow.
   const handleSendMessage = async (text: string) => {
     const userMsg: Message = {
       id: `u-${Date.now()}`,
@@ -169,7 +141,6 @@ export default function App() {
           trip: trip,
           demoCase: activeDemo,
           history: updatedHist.slice(-6, -1), // Send recent context history
-          forceMock: !isAiConnected // Use local mock when Live AI is off.
         })
       });
 
@@ -191,13 +162,13 @@ export default function App() {
       console.error('Error contacting local chat route:', err);
       
       // Fallback response inside client
-      const fallbackMsg: Message = {
+      const apiErrorMsg: Message = {
         id: `a-err-${Date.now()}`,
         sender: 'assistant',
-        text: `Dạ, trợ lý AI hiện đang bận điều hành. Rất mong bạn thông cảm!\n\nBạn có thể tham khảo resort **SOL by Meliá** thiết kế hồ bơi sát biển vô cùng lãng mạn tại ${trip.destination || 'Phú Quốc'} hoặc bật chế độ MOCK MODE trên Sidebar để trải nghiệm mượt mà không lo tải lỗi nhé.`,
+        text: `Chưa thể kết nối Alibaba Model Studio để tạo câu trả lời. Vui lòng kiểm tra backend đang chạy và \`DASHSCOPE_API_KEY\` trong file \`backend/.env\` rồi thử lại.`,
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       };
-      setMessages(prev => [...prev, fallbackMsg]);
+      setMessages(prev => [...prev, apiErrorMsg]);
     } finally {
       setIsGenerating(false);
     }
@@ -223,8 +194,6 @@ export default function App() {
         setViewMode={setViewMode}
         activeDemo={activeDemo}
         triggerDemo={triggerDemo}
-        isAiConnected={isAiConnected}
-        setIsAiConnected={setIsAiConnected}
         clearChat={clearChat}
         onOpenSettings={() => setModalType('settings')}
         onOpenHelp={() => setModalType('help')}
@@ -303,7 +272,6 @@ export default function App() {
               <AIChat 
                 messages={messages}
                 onSendMessage={handleSendMessage}
-                isAiConnected={isAiConnected}
                 isGenerating={isGenerating}
               />
             </section>

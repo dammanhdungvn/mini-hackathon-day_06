@@ -1,20 +1,27 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://ai.google.dev/static/site-assets/images/share-ais-513315318.png" />
-</div>
+# Voyage Intelligence Web
 
-# Run and deploy your AI Studio app
+Thư mục này chỉ chứa giao diện React và server proxy nhẹ.
 
-This contains everything you need to run your app locally.
+## Chạy Web
 
-View your app in AI Studio: https://ai.studio/apps/2004c5a2-abb3-4033-b767-2cc250206653
+```powershell
+npm install
+npm run dev
+```
 
-## Run Locally
+Web chạy ở:
 
-**Prerequisites:**  Node.js
+```text
+http://localhost:3000
+```
 
+## Cấu Hình
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+`web/.env`:
+
+```env
+BACKEND_URL=http://127.0.0.1:8000
+APP_URL=http://localhost:3000
+```
+
+API key Alibaba không đặt trong web. Paste `DASHSCOPE_API_KEY` vào `backend/.env`.

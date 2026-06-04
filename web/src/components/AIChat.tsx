@@ -5,14 +5,12 @@ import { Message } from '../types';
 interface AIChatProps {
   messages: Message[];
   onSendMessage: (text: string) => void;
-  isAiConnected: boolean;
   isGenerating: boolean;
 }
 
 export default function AIChat({ 
   messages, 
   onSendMessage, 
-  isAiConnected,
   isGenerating 
 }: AIChatProps) {
   const [inputText, setInputText] = useState('');
@@ -55,7 +53,7 @@ export default function AIChat({
         
         <div className="text-[10px] text-gray-400 font-mono flex items-center gap-1 bg-[#f8f9ff] px-2 py-0.5 rounded-md">
           <Sparkles className="w-3 h-3 text-[#14B8A6]" />
-          <span>{isAiConnected ? 'Gemini 3.5 Live' : 'Offline Engine'}</span>
+          <span>Qwen3-Max Live</span>
         </div>
       </div>
 

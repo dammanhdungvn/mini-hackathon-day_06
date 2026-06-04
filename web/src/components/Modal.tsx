@@ -150,18 +150,18 @@ export default function Modal({ type, onClose, activeHotel }: ModalProps) {
           {type === 'settings' && (
             <div id="modal-settings-case" className="space-y-4">
               <p className="text-xs text-gray-500 leading-relaxed">
-                Voyage Intelligence đang chạy theo luồng demo local: giao diện gửi yêu cầu vào server trong thư mục web, server xử lý dữ liệu khách sạn và chỉ gọi Gemini khi bạn bật Live AI.
+                Voyage Intelligence đang chạy theo luồng demo local: giao diện gửi yêu cầu vào server trong thư mục web, server xử lý dữ liệu khách sạn và bắt buộc gọi Alibaba Model Studio để trả lời khách hàng.
               </p>
 
               <div className="space-y-3.5">
                 <div className="p-4 bg-slate-50 border border-slate-100 rounded-2xl space-y-3">
                   <div className="flex justify-between items-center text-xs">
                     <span className="font-bold text-gray-500">Mô hình AI chỉ định:</span>
-                    <span className="bg-[#e5eeff] text-[#0F4C81] px-2 py-0.5 rounded-full font-mono font-bold text-[10px]">gemini-3.5-flash</span>
+                    <span className="bg-[#e5eeff] text-[#0F4C81] px-2 py-0.5 rounded-full font-mono font-bold text-[10px]">qwen3-max</span>
                   </div>
 
                   <div className="flex justify-between items-center text-xs">
-                    <span className="font-bold text-gray-500">Khóa Gemini:</span>
+                    <span className="font-bold text-gray-500">Khóa DashScope:</span>
                     <span className="text-emerald-600 font-sans font-bold flex items-center gap-1 bg-emerald-50 px-2 py-0.5 rounded-md text-[10px]">
                       <Shield className="w-3 h-3 text-emerald-500" />
                       <span>Chỉ đọc ở server local</span>
@@ -177,7 +177,7 @@ export default function Modal({ type, onClose, activeHotel }: ModalProps) {
                 <div className="space-y-1.5">
                   <span className="block text-[11px] font-bold text-gray-400 uppercase tracking-wider">Hệ thống Prompt nội tại</span>
                   <div className="p-3 bg-gray-900 text-amber-200 rounded-xl font-mono text-[10px] leading-relaxed max-h-36 overflow-y-auto">
-                    {`System-Instruction: You are "Voyage Intelligence" a friendly, high-trust digital hotel concierge. Your goal is to guide standard tourist bookings by analyzing budget, styles, and destinations in Vietnam. Respond clearly, cleanly, and compactly in beautiful Vietnamese.`}
+                    {`System-Instruction: You are "Voyage Intelligence" a friendly, high-trust digital hotel concierge powered by Alibaba Qwen3-Max. Your goal is to guide standard tourist bookings by analyzing budget, styles, and destinations in Vietnam. Respond clearly, cleanly, and compactly in beautiful Vietnamese.`}
                   </div>
                 </div>
               </div>
