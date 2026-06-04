@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Voyage Intelligence - Code Execution Flow</title>
+  <style>
+@import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800;900&display=swap');
+    :root {
+      --bg: #f5f9ff;
+      --card: #ffffff;
+      --text: #172033;
+      --muted: #5e6b7f;
+      --primary: #2563eb;
+      --primary-soft: #dbeafe;
+      --accent: #06b6d4;
+      --green: #10b981;
+      --orange: #f59e0b;
+      --line: #d8e3f0;
+      --shadow: 0 22px 60px rgba(30, 64, 175, 0.14);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: "Be Vietnam Pro", "SVN-Gilroy", "Montserrat", Arial, sans-serif;
+      background: radial-gradient(circle at top left, #e0f2fe 0, transparent 34%), var(--bg);
+      color: var(--text);
+      overflow: hidden;
+    }
+
+    .deck {
+      width: 100vw;
+      height: 100vh;
+      position: relative;
+    }
+
+    .slide {
+      position: absolute;
+      inset: 0;
+      padding: 54px 70px 74px;
+      display: none;
+      animation: fade .25s ease;
+    }
+
+    .slide.active { display: flex; }
+
+    @keyframes fade {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .layout {
+      width: 100%;
+      height: 100%;
+      max-width: 1280px;
+      margin: 0 auto;
+      background: rgba(255,255,255,.82);
+      border: 1px solid rgba(216, 227, 240, .9);
+      border-radius: 34px;
+      box-shadow: var(--shadow);
+      padding: 48px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .layout::after {
+      content: "";
+      position: absolute;
+      right: -120px;
+      top: -120px;
+      width: 360px;
+      height: 360px;
+      background: linear-gradient(135deg, rgba(37,99,235,.16), rgba(6,182,212,.18));
+      border-radius: 50%;
+      z-index: 0;
+    }
+
+    .content { position: relative; z-index: 1; height: 100%; }
+
+    .eyebrow {
+      display: inline-flex;
+      gap: 10px;
+      align-items: center;
+      padding: 8px 14px;
+      border-radius: 999px;
+      background: var(--primary-soft);
+      color: #1d4ed8;
+      font-size: 15px;
+      font-weight: 700;
+      margin-bottom: 22px;
+    }
+
+    h1 {
+      font-size: 62px;
+      line-height: 1.02;
+      margin: 0 0 22px;
+      letter-spacing: -2.2px;
+    }
+
+    h2 {
+      font-size: 43px;
+      line-height: 1.08;
+      margin: 0 0 28px;
+      letter-spacing: -1.2px;
+    }
+
+    h3 {
+      font-size: 25px;
+      margin: 0 0 10px;
+    }
+
+    p {
+      color: var(--muted);
+      font-size: 22px;
+      line-height: 1.55;
+      margin: 0;
+    }
+
+    .big-note {
+      max-width: 780px;
+      font-size: 25px;
+      color: #334155;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1.05fr .95fr;
+      gap: 34px;
+      align-items: center;
+      height: calc(100% - 86px);
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 22px;
+      margin-top: 24px;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      padding: 24px;
+      box-shadow: 0 12px 28px rgba(15, 23, 42, .06);
+    }
+
+    .card strong {
+      display: block;
+      font-size: 22px;
+      margin-bottom: 8px;
+      color: #0f172a;
+    }
+
+    .card span, .card li {
+      color: var(--muted);
+      font-size: 18px;
+      line-height: 1.45;
+    }
+
+    ul {
+      margin: 12px 0 0;
+      padding-left: 22px;
+    }
+
+    li { margin: 8px 0; }
+
+    .hero-visual {
+      min-height: 420px;
+      border-radius: 30px;
+      background: linear-gradient(145deg, #eff6ff, #ffffff 55%, #ecfeff);
+      border: 1px solid var(--line);
+      padding: 34px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 18px;
+    }
+
+    .bubble {
+      max-width: 88%;
+      padding: 16px 18px;
+      border-radius: 18px;
+      font-size: 18px;
+      line-height: 1.42;
+      box-shadow: 0 10px 24px rgba(15, 23, 42, .07);
+    }
+
+    .bubble.user { align-self: flex-end; background: #2563eb; color: white; }
+    .bubble.ai { align-self: flex-start; background: white; color: #1e293b; border: 1px solid var(--line); }
+
+    .flow {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-top: 32px;
+    }
+
+    .step {
+      flex: 1;
+      min-height: 118px;
+      background: white;
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      padding: 20px;
+      position: relative;
+    }
+
+    .step .num {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: var(--primary);
+      color: white;
+      display: grid;
+      place-items: center;
+      font-weight: 800;
+      margin-bottom: 12px;
+    }
+
+    .arrow {
+      color: var(--primary);
+      font-size: 32px;
+      font-weight: 800;
+    }
+
+    .timeline {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 16px;
+      margin-top: 24px;
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: 190px 1fr;
+      gap: 22px;
+      align-items: start;
+      background: white;
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      padding: 18px 22px;
+    }
+
+    .tag {
+      display: inline-flex;
+      width: fit-content;
+      align-items: center;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: #f1f5f9;
+      color: #334155;
+      font-weight: 800;
+      font-size: 15px;
+    }
+
+    .code-box {
+      background: #0f172a;
+      color: #dbeafe;
+      border-radius: 24px;
+      padding: 24px;
+      font-family: Consolas, Monaco, monospace;
+      font-size: 18px;
+      line-height: 1.55;
+      white-space: pre-wrap;
+      box-shadow: 0 20px 48px rgba(15, 23, 42, .18);
+    }
+
+    .highlight { color: #38bdf8; }
+    .ok { color: #86efac; }
+    .warn { color: #fbbf24; }
+
+    .footer {
+      position: absolute;
+      left: 70px;
+      right: 70px;
+      bottom: 28px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: #64748b;
+      font-size: 14px;
+      z-index: 5;
+    }
+
+    .progress {
+      height: 8px;
+      width: 210px;
+      border-radius: 999px;
+      background: #dbeafe;
+      overflow: hidden;
+    }
+
+    .bar {
+      height: 100%;
+      width: 12.5%;
+      background: linear-gradient(90deg, var(--primary), var(--accent));
+      border-radius: 999px;
+      transition: width .2s ease;
+    }
+
+    .nav {
+      position: fixed;
+      right: 26px;
+      bottom: 22px;
+      display: flex;
+      gap: 10px;
+      z-index: 10;
+    }
+
+    button {
+      border: 0;
+      border-radius: 999px;
+      padding: 11px 16px;
+      font-weight: 800;
+      background: #ffffff;
+      color: #1d4ed8;
+      box-shadow: 0 10px 28px rgba(37,99,235,.16);
+      cursor: pointer;
+    }
+
+    button:hover { background: #eff6ff; }
+
+    .file-list {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+      margin-top: 26px;
+    }
+
+    .file {
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+      background: white;
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      padding: 18px;
+    }
+
+    .icon {
+      width: 42px;
+      height: 42px;
+      border-radius: 14px;
+      background: var(--primary-soft);
+      color: var(--primary);
+      display: grid;
+      place-items: center;
+      font-weight: 900;
+      flex: none;
+    }
+
+    .diagram {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 18px;
+      align-items: stretch;
+      margin-top: 26px;
+    }
+
+    .mini {
+      min-height: 190px;
+      background: white;
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      padding: 22px;
+    }
+
+    .mini .label {
+      color: var(--primary);
+      font-size: 14px;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: .8px;
+      margin-bottom: 12px;
+    }
+
+    .center {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    @media print {
+      body { overflow: visible; background: white; }
+      .deck { height: auto; }
+      .slide { position: relative; display: flex !important; height: 100vh; page-break-after: always; }
+      .nav, .footer { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <main class="deck">
+    <section class="slide active">
+      <div class="layout"><div class="content grid-2">
+        <div class="center">
+          <div class="eyebrow">Voyage Intelligence · AI Hotel Advisor</div>
+          <h1>Luồng xử lý Code từ Frontend đến AI</h1>
+          <p class="big-note">Một Web Demo tư vấn khách sạn: React hiển thị giao diện, Vite Middleware giữ vai trò backend nhẹ, Alibaba Model Studio xử lý AI và tool-calling.</p>
+        </div>
+        <div class="hero-visual">
+          <div class="bubble user">“Mình đi Đà Nẵng, ngân sách 2 triệu/đêm, muốn gần biển.”</div>
+          <div class="bubble ai">AI phân tích nhu cầu → gọi tool tìm khách sạn → trả lời bằng dữ liệu thật.</div>
+          <div class="bubble ai">Kết quả: Top 3 khách sạn phù hợp nhất, có lý do đề xuất rõ ràng.</div>
+        </div>
+      </div></div>
+    </section>
+
+    <section class="slide">
+      <div class="layout"><div class="content">
+        <div class="eyebrow">1 · Problem</div>
+        <h2>Khách du lịch tự túc khó chọn nơi lưu trú phù hợp</h2>
+        <div class="grid-3">
+          <div class="card"><strong>Quá nhiều lựa chọn</strong><span>User phải xem nhiều nền tảng như Booking, Agoda, Traveloka, Google và tự so sánh hàng chục khách sạn.</span></div>
+          <div class="card"><strong>Không biết cái nào phù hợp</strong><span>Cùng một mức giá nhưng mỗi khách sạn phù hợp với một nhóm khách khác nhau: cặp đôi, gia đình, nghỉ dưỡng hoặc tiết kiệm.</span></div>
+          <div class="card"><strong>Thông tin nhập chưa đủ</strong><span>User thường chỉ nói “Tôi muốn đi Phú Quốc” nên AI dễ gợi ý sai nếu không hỏi lại.</span></div>
+        </div>
+        <div class="card" style="margin-top:28px;">
+          <strong>Hệ quả</strong>
+          <span>Tốn thời gian tìm kiếm, khó đưa ra quyết định, dễ chọn khách sạn vượt ngân sách hoặc không đúng nhu cầu.</span>
+        </div>
+      </div></div>
+    </section>
+
+    <section class="slide">
+      <div class="layout"><div class="content center">
+        <div class="eyebrow">2 · Insight</div>
+        <h2>Người dùng không thiếu thông tin — họ thiếu hỗ trợ ra quyết định</h2>
+        <p class="big-note">
+          Các nền tảng hiện tại cung cấp rất nhiều danh sách khách sạn, nhưng người dùng vẫn phải tự đọc review, so sánh giá, tiện ích, vị trí và tự đoán lựa chọn nào phù hợp nhất với mình.
+        </p>
+        <div class="flow">
+          <div class="step"><div class="num">1</div><strong>Nhiều khách sạn</strong><br><span>Thông tin phân tán trên nhiều nền tảng</span></div>
+          <div class="arrow">→</div>
+          <div class="step"><div class="num">2</div><strong>User tự phân tích</strong><br><span>Đọc review, lọc giá, so sánh tiện ích</span></div>
+          <div class="arrow">→</div>
+          <div class="step"><div class="num">3</div><strong>Khó quyết định</strong><br><span>Không chắc đâu là lựa chọn tốt nhất</span></div>
+        </div>
+      </div></div>
+    </section>
+
+    <section class="slide">
+      <div class="layout"><div class="content">
+        <div class="eyebrow">3 · Solution</div>
+        <h2>AI Travel Concierge Bot hỗ trợ quá trình chọn khách sạn</h2>
+        <p class="big-note">AI không thay user đặt phòng. AI đóng vai trò trợ lý hỗ trợ ra quyết định trước khi user chọn khách sạn cuối cùng.</p>
+        <div class="timeline">
+          <div class="row"><div class="tag">Understand</div><p>Hiểu điểm đến, ngân sách, số người, mục đích chuyến đi và sở thích lưu trú.</p></div>
+          <div class="row"><div class="tag">Ask Again</div><p>Hỏi thêm khi user thiếu thông tin quan trọng như ngân sách, số người hoặc phong cách du lịch.</p></div>
+          <div class="row"><div class="tag">Match</div><p>Tìm khách sạn phù hợp từ dữ liệu có sẵn, lọc theo giá, khu vực, tiện ích và loại khách hàng.</p></div>
+          <div class="row"><div class="tag">Recommend</div><p>Đề xuất Top 3 khách sạn, loại phòng, tiện ích nổi bật và lý do vì sao phù hợp.</p></div>
+        </div>
+      </div></div>
+    </section>
+
+    <section class="slide">
+      <div class="layout"><div class="content">
+        <div class="eyebrow">4 · AI Decision Support Flow</div>
+        <h2>AI xử lý bài toán như một Decision Support Workflow</h2>
+        <div class="flow">
+          <div class="step"><div class="num">1</div><strong>User Request</strong><br><span>“Phú Quốc, 2 người, 2 triệu/đêm, gần biển”</span></div>
+          <div class="arrow">→</div>
+          <div class="step"><div class="num">2</div><strong>Traveler Profile</strong><br><span>Cặp đôi · Tầm trung · Nghỉ dưỡng</span></div>
+          <div class="arrow">→</div>
+          <div class="step"><div class="num">3</div><strong>Hotel Ranking</strong><br><span>Lọc dữ liệu và chấm điểm phù hợp</span></div>
+          <div class="arrow">→</div>
+          <div class="step"><div class="num">4</div><strong>Top 3 Output</strong><br><span>Khách sạn + phòng + lý do đề xuất</span></div>
+        </div>
+        <div class="grid-3">
+          <div class="card"><strong>Happy Path</strong><span>Đủ thông tin → gợi ý Top 3 khách sạn phù hợp.</span></div>
+          <div class="card"><strong>Low Confidence</strong><span>Thiếu hoặc mâu thuẫn thông tin → hỏi lại hoặc đề xuất phương án thay thế.</span></div>
+          <div class="card"><strong>Correction</strong><span>User đổi tiêu chí → AI cập nhật gợi ý thay vì bắt đầu lại từ đầu.</span></div>
+        </div>
+      </div></div>
+    </section>
+
+
+    <section class="slide">
+      <div class="layout"><div class="content">
+        <div class="eyebrow">5 · Architecture</div>
+        <h2>Kiến trúc tổng quan của hệ thống</h2>
+        <div class="diagram">
+          <div class="mini"><div class="label">Frontend</div><h3>React + TypeScript</h3><p>Quản lý UI, trạng thái hành trình, chat và danh sách khách sạn phù hợp.</p></div>
+          <div class="mini"><div class="label">Middleware</div><h3>Vite API</h3><p>Tạo endpoint local như /api/chat, /api/hotels để frontend gọi nội bộ.</p></div>
+          <div class="mini"><div class="label">AI Provider</div><h3>Qwen3 Max</h3><p>Đọc ngữ cảnh, quyết định gọi tool và sinh câu trả lời cuối cùng.</p></div>
+          <div class="mini"><div class="label">Mock Data</div><h3>Hotel DB</h3><p>Dữ liệu khách sạn giả lập, dùng để lọc, chấm điểm và trả Top 3.</p></div>
+        </div>
+        <div class="flow">
+          <div class="step"><div class="num">1</div><strong>Browser UI</strong><br><span>Người dùng nhập nhu cầu</span></div>
+          <div class="arrow">→</div>
+          <div class="step"><div class="num">2</div><strong>Vite Middleware</strong><br><span>Nhận request và giữ API Key an toàn</span></div>
+          <div class="arrow">→</div>
+          <div class="step"><div class="num">3</div><strong>AI + Tool</strong><br><span>Phân tích, gọi tool, trả tư vấn</span></div>
+        </div>
+      </div></div>
+    </section>
+
+    <section class="slide">
+      <div class="layout"><div class="content">
+        <div class="eyebrow">6 · Startup Flow</div>
+        <h2>Luồng khởi động ứng dụng</h2>
+        <div class="timeline">
+          <div class="row"><div class="tag">npm run dev</div><p>Developer chạy lệnh tại thư mục web để khởi động môi trường demo.</p></div>
+          <div class="row"><div class="tag">vite.config.ts</div><p>Vite đọc cấu hình và đăng ký plugin aiAdvisorApiPlugin().</p></div>
+          <div class="row"><div class="tag">Local API</div><p>Plugin tạo các endpoint: /api/health, /api/demo-cases, /api/hotels, /api/chat.</p></div>
+          <div class="row"><div class="tag">App.tsx</div><p>Trình duyệt tải React App, dựng giao diện chat và các vùng hiển thị quyết định khách sạn.</p></div>
+        </div>
+      </div></div>
+    </section>
+
+    <section class="slide">
+      <div class="layout"><div class="content grid-2">
+        <div>
+          <div class="eyebrow">7 · Frontend Flow</div>
+          <h2>Người dùng gửi tin nhắn như thế nào?</h2>
+          <p class="big-note">Frontend không chỉ gửi câu hỏi. Nó gửi cả trạng thái hành trình hiện tại để AI hiểu bối cảnh người dùng đang chọn gì trên UI.</p>
+          <div class="grid-3">
+            <div class="card"><strong>trip</strong><span>Điểm đến, ngân sách, số người, sở thích.</span></div>
+            <div class="card"><strong>messages</strong><span>Lịch sử hội thoại gần nhất.</span></div>
+            <div class="card"><strong>matchedHotels</strong><span>Danh sách khách sạn phù hợp đang hiển thị.</span></div>
+          </div>
+        </div>
+        <div class="code-box">POST <span class="highlight">/api/chat</span>
+{
+  message: <span class="ok">"câu hỏi của user"</span>,
+  trip: <span class="warn">{ điểm đến, ngân sách, sở thích }</span>,
+  demoCase: <span class="ok">"happy"</span>,
+  history: <span class="warn">[5-6 tin nhắn gần nhất]</span>
+}</div>
+      </div></div>
+    </section>
+
+    <section class="slide">
+      <div class="layout"><div class="content">
+        <div class="eyebrow">8 · Backend AI Flow</div>
+        <h2>Backend xử lý AI theo 2 lần gọi</h2>
+        <div class="flow">
+          <div class="step"><div class="num">1</div><strong>Chuẩn bị Context</strong><br><span>System prompt + history + trạng thái UI + tool schema.</span></div>
+          <div class="arrow">→</div>
+          <div class="step"><div class="num">2</div><strong>AI quyết định</strong><br><span>Có cần gọi fetch_matching_hotels hay không?</span></div>
+          <div class="arrow">→</div>
+          <div class="step"><div class="num">3</div><strong>Tool xử lý</strong><br><span>Lọc dữ liệu thật, chấm điểm, lấy Top 3.</span></div>
+          <div class="arrow">→</div>
+          <div class="step"><div class="num">4</div><strong>AI trả lời</strong><br><span>Viết tư vấn tự nhiên dựa trên kết quả tool.</span></div>
+        </div>
+        <div class="card" style="margin-top:30px;">
+          <strong>Điểm quan trọng</strong>
+          <span>AI không được tự bịa khách sạn. Dữ liệu khách sạn phải đi qua tool hoặc fallback logic từ server.</span>
+        </div>
+      </div></div>
+    </section>
+
+    <section class="slide">
+      <div class="layout"><div class="content grid-2">
+        <div>
+          <div class="eyebrow">9 · Tool Calling</div>
+          <h2>Hai chế độ xử lý để tránh AI “ảo tưởng”</h2>
+          <div class="card" style="margin-bottom:18px;">
+            <strong>Model Tool-Call Mode</strong>
+            <span>AI hiểu rằng cần dữ liệu khách sạn, tự gọi tool fetch_matching_hotels với arguments đã phân tích.</span>
+          </div>
+          <div class="card">
+            <strong>Server Fallback Mode</strong>
+            <span>Nếu AI không gọi tool, backend tự parse câu hỏi và ép chạy logic lọc khách sạn để vẫn có dữ liệu thật.</span>
+          </div>
+        </div>
+        <div class="code-box">if (AI gọi tool) {
+  mode = <span class="ok">"model-tool-call"</span>
+  args = AI.arguments
+  hotels = fetchMatchingHotelsFromDb(args)
+} else {
+  mode = <span class="warn">"server-fallback"</span>
+  args = buildToolArgsFromMessage(userMessage)
+  hotels = fetchMatchingHotelsFromDb(args)
+}</div>
+      </div></div>
+    </section>
+
+    <section class="slide">
+      <div class="layout"><div class="content">
+        <div class="eyebrow">10 · Core Logic</div>
+        <h2>Core lọc và chấm điểm khách sạn</h2>
+        <div class="timeline">
+          <div class="row"><div class="tag">Input</div><p>Nhận các tiêu chí: mục đích chuyến đi, mức ngân sách, khu vực, yêu cầu chính.</p></div>
+          <div class="row"><div class="tag">Parse DB</div><p>Đọc danh sách khách sạn từ data_hotel.py và chuyển thành mảng object để xử lý.</p></div>
+          <div class="row"><div class="tag">Scoring</div><p>So khớp keyword, giá, khu vực, tiện ích, sở thích; cộng điểm match_score.</p></div>
+          <div class="row"><div class="tag">Top 3</div><p>Sắp xếp điểm từ cao xuống thấp và chọn 3 khách sạn phù hợp nhất.</p></div>
+        </div>
+      </div></div>
+    </section>
+
+    <section class="slide">
+      <div class="layout"><div class="content">
+        <div class="eyebrow">11 · Key Files</div>
+        <h2>Các file quan trọng cần nhớ khi trình bày</h2>
+        <div class="file-list">
+          <div class="file"><div class="icon">FE</div><div><h3>web/src/App.tsx</h3><p>Trái tim frontend: state UI, gửi tin nhắn, nhận response, render chat.</p></div></div>
+          <div class="file"><div class="icon">API</div><div><h3>web/vite.config.ts</h3><p>Đóng vai trò backend nhẹ, tạo các endpoint local cho demo.</p></div></div>
+          <div class="file"><div class="icon">AI</div><div><h3>backend/aiAdvisor.ts</h3><p>Điều phối 2 lần gọi AI, tool-calling và final response.</p></div></div>
+          <div class="file"><div class="icon">DB</div><div><h3>backend/advisorCore.ts</h3><p>Business logic: parse điều kiện, lọc dữ liệu, scoring khách sạn.</p></div></div>
+          <div class="file"><div class="icon">SP</div><div><h3>system_promts.txt</h3><p>Quy định vai trò, giọng điệu và nguyên tắc trả lời của AI.</p></div></div>
+          <div class="file"><div class="icon">DATA</div><div><h3>data_hotel.py</h3><p>Mock database chứa danh sách khách sạn phục vụ demo.</p></div></div>
+        </div>
+      </div></div>
+    </section>
+
+    <section class="slide">
+      <div class="layout"><div class="content center">
+        <div class="eyebrow">12 · Closing</div>
+        <h2>Tóm lại: đây không chỉ là chatbot, mà là Decision Support Flow</h2>
+        <p class="big-note">Người dùng nhập nhu cầu → frontend gửi kèm bối cảnh → backend gọi AI → tool lấy dữ liệu thật → core scoring chọn Top 3 → AI giải thích kết quả bằng ngôn ngữ dễ hiểu.</p>
+        <div class="grid-3">
+          <div class="card"><strong>An toàn hơn</strong><span>API Key nằm phía server cục bộ, không lộ trực tiếp ở frontend.</span></div>
+          <div class="card"><strong>Ít hallucination hơn</strong><span>Có tool-calling và server fallback để buộc dùng dữ liệu thật.</span></div>
+          <div class="card"><strong>Dễ demo hơn</strong><span>Vite Middleware giúp triển khai nhanh, phù hợp hackathon.</span></div>
+        </div>
+      </div></div>
+    </section>
+  </main>
+
+  <div class="footer">
+    <span>Voyage Intelligence · AI Hotel Advisor</span>
+    <div class="progress"><div class="bar" id="bar"></div></div>
+    <span id="count">1 / 8</span>
+  </div>
+
+  <div class="nav">
+    <button onclick="prevSlide()">← Trước</button>
+    <button onclick="nextSlide()">Tiếp →</button>
+  </div>
+
+  <script>
+    const slides = [...document.querySelectorAll('.slide')];
+    const bar = document.getElementById('bar');
+    const count = document.getElementById('count');
+    let current = 0;
+
+    function showSlide(index) {
+      current = Math.max(0, Math.min(index, slides.length - 1));
+      slides.forEach((slide, i) => slide.classList.toggle('active', i === current));
+      bar.style.width = ((current + 1) / slides.length * 100) + '%';
+      count.textContent = `${current + 1} / ${slides.length}`;
+    }
+
+    function nextSlide() { showSlide(current + 1); }
+    function prevSlide() { showSlide(current - 1); }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === ' ') nextSlide();
+      if (e.key === 'ArrowLeft') prevSlide();
+    });
+  </script>
+</body>
+</html>
