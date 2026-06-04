@@ -19,7 +19,7 @@ export default function AIChat({
   const suggestionChips = [
     'Xem thêm phòng giá tốt',
     'Khách sạn SOL có gì chơi?',
-    'Đổi điểm đi Đà Nẵng',
+    'Gợi ý khu vực yên tĩnh ở Phú Quốc',
     'Mục đặc sắc tại Lahana'
   ];
 

@@ -170,18 +170,14 @@ export default function TripSummaryCard({ trip, onUpdateTrip }: TripSummaryCardP
             {/* Destination inputs */}
             <div className="space-y-1">
               <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-wider">Điểm đến</label>
-              <select
+              <input
                 id="edit-destination"
+                type="text"
                 value={editedDestination}
                 onChange={(e) => setEditedDestination(e.target.value)}
+                placeholder="Ví dụ: Phú Quốc"
                 className="w-full bg-[#f8f9ff] border border-[#e5eeff] rounded-xl px-3 py-2 text-xs font-semibold text-gray-800 transition focus:outline-none focus:ring-2 focus:ring-[#0F4C81] focus:bg-white"
-              >
-                <option value="">-- Chọn điểm đến --</option>
-                <option value="Phú Quốc">Phú Quốc Resort Island</option>
-                <option value="Nha Trang">Nha Trang Bay</option>
-                <option value="Đà Nẵng">Đà Nẵng City</option>
-                <option value="Sầm Sơn">Sầm Sơn Beach Resort</option>
-              </select>
+              />
             </div>
 
             {/* Budget Range Input */}
