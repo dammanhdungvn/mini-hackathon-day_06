@@ -17,6 +17,7 @@ import {
   Wifi
 } from 'lucide-react';
 import { ViewMode, DemoCase } from '../types';
+import ToolExecutionCard from './ToolExecutionCard';
 
 interface SidebarProps {
   viewMode: ViewMode;
@@ -26,6 +27,7 @@ interface SidebarProps {
   clearChat: () => void;
   onOpenSettings: () => void;
   onOpenHelp: () => void;
+  lastToolCall?: { args: any; mode: string } | null;
 }
 
 export default function Sidebar({
@@ -35,8 +37,11 @@ export default function Sidebar({
   triggerDemo,
   clearChat,
   onOpenSettings,
-  onOpenHelp
+  onOpenHelp,
+  lastToolCall
 }: SidebarProps) {
+  const [isToolCallsHidden, setIsToolCallsHidden] = React.useState(false);
+
   return (
     <aside id="sidebar-container" className="w-80 bg-white border-r border-[#e5eeff] flex flex-col h-full shrink-0 shadow-sm">
       {/* Brand Header */}
@@ -155,6 +160,25 @@ export default function Sidebar({
               </div>
               <TrendingUp className="w-3.5 h-3.5 opacity-60 text-red-500 rotate-180" />
             </button>
+
+            <button
+              id="demo-freestyle"
+              onClick={() => triggerDemo('freestyle')}
+              className={`w-full text-left flex items-center justify-between p-3 rounded-xl border text-xs transition-all ${
+                activeDemo === 'freestyle'
+                  ? 'bg-[#eff4ff] border-[#0F4C81] text-[#0F4C81] font-medium shadow-sm'
+                  : 'bg-white border-gray-100 text-gray-700 hover:bg-[#f8f9ff] hover:border-gray-200'
+              }`}
+            >
+              <div className="flex items-center gap-2.5">
+                <div className={`w-2.5 h-2.5 rounded-full ${activeDemo === 'freestyle' ? 'bg-[#0F4C81] animate-ping' : 'bg-purple-500'}`} />
+                <div>
+                  <div className="font-semibold text-gray-900">Freestyle (Trống)</div>
+                  <div className="text-[11px] text-gray-400 mt-0.5">Không có yêu cầu mặc định</div>
+                </div>
+              </div>
+              <Sparkles className="w-3.5 h-3.5 opacity-60 text-purple-500" />
+            </button>
           </div>
 
           <button
@@ -195,17 +219,29 @@ export default function Sidebar({
           </div>
         </div>
 
-        {/* HACKATHON CHECKPOINTS */}
-        <div id="checkpoints-section" className="p-4 bg-orange-50/50 rounded-xl border border-orange-100 space-y-2">
-          <div className="flex items-center gap-1.5 text-xs text-orange-800 font-bold">
-            <Clock className="w-3.5 h-3.5" />
-            <span>Checkpoints Hackathon</span>
+        {/* LLM TOOL CALLS */}
+        <div id="tool-calls-wrapper">
+          <div className="flex items-center justify-between mb-3 px-4">
+            <span className="text-xs uppercase font-sans font-semibold tracking-wider text-gray-400">
+              Tool Output
+            </span>
+            <button 
+              onClick={() => setIsToolCallsHidden(!isToolCallsHidden)}
+              className="text-[10px] text-gray-400 hover:text-gray-600 font-bold transition-colors uppercase"
+            >
+              {isToolCallsHidden ? 'Hiện' : 'Ẩn'}
+            </button>
           </div>
-          <div className="text-[11px] text-orange-700/80 space-y-1 font-mono">
-            <div>• 09:00 Khởi tạo ý tưởng</div>
-            <div className="font-semibold text-[#0F4C81]">• 11:00 Demo Prototype Chạy ok</div>
-            <div>• 14:00 Thuyết trình dự án</div>
-          </div>
+          {!isToolCallsHidden && (
+            <ToolExecutionCard 
+              mode={lastToolCall?.mode}
+              travel_purpose={lastToolCall?.args?.travel_purpose}
+              budget_tier={lastToolCall?.args?.budget_tier}
+              area={lastToolCall?.args?.area}
+              key_requirements={lastToolCall?.args?.key_requirements}
+              rawArgs={lastToolCall?.args}
+            />
+          )}
         </div>
 
       </div>

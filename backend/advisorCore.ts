@@ -36,6 +36,7 @@ export interface RawHotel {
   area: string;
   price_tier: string;
   est_price_vnd: number;
+  stars: number;
   usp: string;
   room_types: string[];
   amenities: string[];
@@ -46,6 +47,7 @@ export interface RawHotel {
 export interface FetchMatchingHotelsArgs {
   travel_purpose: string;
   budget_tier: string;
+  budget_val?: number;
   area: string;
   key_requirements: string[];
 }
@@ -160,7 +162,14 @@ export function fetchMatchingHotelsFromDb(
     const hotelTier = normalize(hotel.price_tier);
     const hotelArea = normalize(hotel.area);
 
-    if (!UNCLEAR_VALUES.has(normalizedBudget) && hotelTier !== normalizedBudget) continue;
+    if (args.budget_val && args.budget_val > 0) {
+      // If budget_val is provided (e.g. from UI slider), filter out hotels strictly more expensive than budget
+      if (hotel.est_price_vnd > args.budget_val) continue;
+    } else {
+      // Fallback for AI tool calls which only provide budget_tier string
+      if (!UNCLEAR_VALUES.has(normalizedBudget) && hotelTier !== normalizedBudget) continue;
+    }
+    
     if (!UNCLEAR_VALUES.has(normalizedArea) && !hotelArea.includes(normalizedArea)) continue;
 
     const searchableText = normalize(
@@ -223,14 +232,14 @@ export function fetchMatchingHotelsFromDb(
       const scoreDiff = (right.match_score || 0) - (left.match_score || 0);
       if (scoreDiff !== 0) return scoreDiff;
       return left.est_price_vnd - right.est_price_vnd;
-    })
-    .slice(0, 3);
+    });
 }
 
 export function buildToolArgsFromTrip(trip: TripInfo): FetchMatchingHotelsArgs {
   return {
     travel_purpose: trip.travelStyle || 'Chưa rõ',
     budget_tier: inferBudgetTier(trip),
+    budget_val: trip.budgetVal * 1000,
     area: 'Chưa rõ',
     key_requirements: trip.preference ? [trip.preference] : [],
   };
@@ -337,7 +346,7 @@ export function mapHotelForUi(
 ): Hotel {
   const priceVnd = Number(hotel.est_price_vnd || 0);
   const priceTier = hotel.price_tier || 'Tầm trung';
-  const stars = priceTier === 'Cao cấp' ? 5 : priceTier === 'Tiết kiệm' ? 3 : 4;
+  const stars = hotel.stars || (priceTier === 'Cao cấp' ? 5 : priceTier === 'Tiết kiệm' ? 3 : 4);
   const priceText = formatPrice(priceVnd);
   const matchPercent = Number(hotel.match_score || 80);
   const budgetVnd = trip.budgetVal * 1000;

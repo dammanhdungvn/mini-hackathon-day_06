@@ -41,6 +41,7 @@ export default function App() {
   // Chat context state
   const [messages, setMessages] = useState<Message[]>(INITIAL_DEMO?.messages || []);
   const [isGenerating, setIsGenerating] = useState<boolean>(false);
+  const [lastToolCall, setLastToolCall] = useState<{args: any, mode: string} | null>(null);
 
   // Modals state
   const [modalType, setModalType] = useState<'book' | 'details' | 'settings' | 'help' | null>(null);
@@ -73,6 +74,7 @@ export default function App() {
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       }
     ]);
+    setLastToolCall(null);
   };
 
   // Updates parameters and switches to a custom mode
@@ -111,6 +113,8 @@ export default function App() {
       if (!response.ok) {
         throw new Error(data.error || 'Alibaba chat request failed');
       }
+      
+      setLastToolCall({ args: data.toolArgs, mode: data.toolCallMode });
       
       const assistantMsg: Message = {
         id: `a-${Date.now()}`,
@@ -158,6 +162,7 @@ export default function App() {
         clearChat={clearChat}
         onOpenSettings={() => setModalType('settings')}
         onOpenHelp={() => setModalType('help')}
+        lastToolCall={lastToolCall}
       />
 
       {/* Main Experience Space (Right Side) */}

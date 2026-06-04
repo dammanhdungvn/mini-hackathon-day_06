@@ -32,7 +32,6 @@ export const PHU_QUOC_HOTELS_DB = parseHotelDatabase(dataHotelRaw);
 export { createTripAnalysis };
 
 export function getMatchedHotelsForTrip(trip: TripInfo): Hotel[] {
-  if (!trip.destination) return [];
 
   const hotels = fetchHotelsForTrip(PHU_QUOC_HOTELS_DB, trip);
   const fallbackHotels = hotels.length > 0 ? hotels : PHU_QUOC_HOTELS_DB.slice(0, 3);

@@ -192,7 +192,7 @@ export default function TripSummaryCard({ trip, onUpdateTrip }: TripSummaryCardP
                 id="edit-budget"
                 type="range"
                 min="0"
-                max="5000"
+                max="10000"
                 step="200"
                 value={editedBudgetVal}
                 onChange={(e) => setEditedBudgetVal(parseInt(e.target.value))}
@@ -200,8 +200,8 @@ export default function TripSummaryCard({ trip, onUpdateTrip }: TripSummaryCardP
               />
               <div className="flex justify-between text-[10px] text-gray-400 font-bold">
                 <span>0 VND</span>
-                <span>2.5M</span>
                 <span>5.0M</span>
+                <span>10.0M</span>
               </div>
             </div>
 

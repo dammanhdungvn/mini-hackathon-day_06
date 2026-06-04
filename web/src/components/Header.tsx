@@ -34,41 +34,6 @@ export default function Header({ userEmail = 'tung2004nguyen52@gmail.com' }: Hea
           )}
         </button>
 
-        <button
-          id="nav-lich-trinh"
-          onClick={() => setActiveTab('lich-trinh')}
-          className={`h-full border-b-2 flex items-center px-1 text-sm font-semibold tracking-tight transition-all relative ${
-            activeTab === 'lich-trinh'
-              ? 'border-[#0F4C81] text-[#0F4C81] font-bold'
-              : 'border-transparent text-gray-500 hover:text-gray-900'
-          }`}
-        >
-          Lịch trình
-        </button>
-
-        <button
-          id="nav-khach-san"
-          onClick={() => setActiveTab('khach-san')}
-          className={`h-full border-b-2 flex items-center px-1 text-sm font-semibold tracking-tight transition-all relative ${
-            activeTab === 'khach-san'
-              ? 'border-[#0F4C81] text-[#0F4C81] font-bold'
-              : 'border-transparent text-gray-500 hover:text-gray-900'
-          }`}
-        >
-          Khách sạn
-        </button>
-
-        <button
-          id="nav-uu-dai"
-          onClick={() => setActiveTab('uu-dai')}
-          className={`h-full border-b-2 flex items-center px-1 text-sm font-semibold tracking-tight transition-all relative ${
-            activeTab === 'uu-dai'
-              ? 'border-[#0F4C81] text-[#0F4C81] font-bold'
-              : 'border-transparent text-gray-500 hover:text-gray-900'
-          }`}
-        >
-          Ưu đãi
-        </button>
       </nav>
 
       {/* User Actions Right */}

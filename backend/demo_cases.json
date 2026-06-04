@@ -34,5 +34,17 @@
     },
     "analysis": "Có mâu thuẫn giữa ngân sách tiết kiệm và yêu cầu resort siêu sang.",
     "messages": []
+  },
+  "freestyle": {
+    "trip": {
+      "destination": "",
+      "budget": "Chưa xác định",
+      "budgetVal": 0,
+      "guests": 1,
+      "travelStyle": "",
+      "preference": ""
+    },
+    "analysis": "Không có yêu cầu mặc định. Hãy nhắn tin trực tiếp để bắt đầu tìm kiếm khách sạn theo cách của riêng bạn.",
+    "messages": []
   }
 }

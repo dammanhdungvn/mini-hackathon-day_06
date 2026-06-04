@@ -30,4 +30,4 @@ export interface Message {
 
 export type ViewMode = 'user' | 'admin';
 
-export type DemoCase = 'happy' | 'error' | 'low_confidence' | 'custom';
+export type DemoCase = 'happy' | 'error' | 'low_confidence' | 'freestyle' | 'custom';
