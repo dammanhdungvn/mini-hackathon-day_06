@@ -2,92 +2,59 @@
 
 > Chatbot AI tư vấn khách sạn Phú Quốc sử dụng Alibaba Qwen3-max với tool-calling, giúp du khách chọn lưu trú phù hợp theo ngân sách, phong cách và sở thích cá nhân.
 
-![Tech Stack](https://img.shields.io/badge/React_19-TypeScript-blue)
-![AI](https://img.shields.io/badge/AI-Alibaba_Qwen3--max-orange)
 ![Status](https://img.shields.io/badge/Status-MVP_Demo-green)
 
 ---
 
-## Cách chạy prototype
+## 📋 Mô tả sản phẩm
 
-### 1. Yêu cầu môi trường
-- **Node.js** ≥ 18
-- **npm** ≥ 9
-- **API Key** từ Alibaba Model Studio (DashScope)
+**Vấn đề:** Khách du lịch gặp khó khăn khi lướt qua hàng trăm lựa chọn khách sạn trên OTA (Booking, Agoda), tốn thời gian tự lọc theo ngân sách, vị trí và tiện ích.
 
-### 2. Install dependencies
-Mở terminal, di chuyển vào thư mục code và cài đặt các thư viện cần thiết:
-```bash
-cd codebase/web
-npm install
-```
+**Giải pháp:** Ứng dụng AI đóng vai trò như một tư vấn viên du lịch địa phương. Lắng nghe nhu cầu qua chat tự nhiên, tự động trích xuất các tiêu chí, truy vấn cơ sở dữ liệu khách sạn tại Phú Quốc và đề xuất khách sạn chính xác kèm theo lý do.
 
-### 3. Setup biến môi trường
-Tạo file môi trường tại thư mục backend bằng template có sẵn:
-```bash
-cp codebase/backend/.env.example codebase/backend/.env
-```
-Mở file `codebase/backend/.env` và cập nhật API Key thật của bạn:
-```env
-DASHSCOPE_API_KEY=<your-api-key-here>
-DASHSCOPE_BASE_URL=https://dashscope-intl.aliyuncs.com/compatible-mode/v1
-DASHSCOPE_MODEL=qwen3-max
-```
-
-### 4. Start project
-Khởi động máy chủ dev (Vite sẽ đóng vai trò cả Frontend Server lẫn Backend API Middleware):
-```bash
-cd codebase/web
-npm run dev
-```
-Mở trình duyệt tại: **http://localhost:3000**
-
-*(Lưu ý: Ứng dụng hiện tại chỉ chạy ở môi trường Local/Localhost, chưa được deploy public. Hãy chạy theo hướng dẫn trên để xem demo).*
+**Chức năng chính:**
+- Chatbot AI giao tiếp bằng Tiếng Việt.
+- Cơ chế **Tool-calling** tự động filter database 21 khách sạn.
+- Giao diện 3 cột: Cấu hình thông số chuyến đi, Danh sách gợi ý, và Trò chuyện.
+- Chế độ Admin theo dõi luồng AI parse dữ liệu.
+- Tích hợp sẵn 4 kịch bản test (Happy Case, Error Case, Low Confidence, Freestyle).
 
 ---
 
-## Công nghệ sử dụng
+## 👥 Thành viên nhóm
 
-- **Frontend Framework**: React 19 + TypeScript + Vite 6
-- **Backend/API**: Vite Middleware (Node.js) — proxy API calls trực tiếp không cần server riêng biệt.
-- **Database**: Dữ liệu tĩnh lưu dưới dạng Python List trong `codebase/data_hotel.py` (21 khách sạn) và được backend parse.
-- **AI Model/Provider**: Alibaba Model Studio (DashScope) — Model `qwen3-max` qua chuẩn OpenAI-compatible.
-- **UI Library**: TailwindCSS v4, Lucide React (Icons).
-- **Deploy Platform**: Localhost (Chưa deploy public).
+| Mã HV | Họ tên | Vai trò |
+|--------|--------|---------|
+| 2A202600741 | Đàm Mạnh Dũng | AI / Backend Developer |
+| 2A202600846 | Nguyễn Hoàng Thanh Tùng | Tech Lead / Full-stack |
+| 2A202600755 | Lê Bá Chiến | UI/UX & QA |
 
 ---
 
-## Phân công thành viên
+## 📌 Phân công công việc
 
-*(Vui lòng điền tên hoặc mã sinh viên thực tế của nhóm vào các mục dưới đây trước khi nộp bài)*
-
-| Hạng mục | Người phụ trách |
-|----------|-----------------|
-| Viết SPEC (Tài liệu đặc tả) | Tùng Nguyễn |
-| Xây dựng Prototype | Tùng Nguyễn |
-| Prompt design & testing | Tùng Nguyễn |
-| AI workflow (Logic Tool-calling) | Tùng Nguyễn |
-| Lập trình Giao diện (UI) | Tùng Nguyễn |
-| Lập trình Backend/API | Tùng Nguyễn |
-| Quản lý repo & Chuẩn hóa | Tùng Nguyễn |
-| Testing (Kiểm thử chức năng) | Tùng Nguyễn |
-| Xây dựng Kịch bản demo | Tùng Nguyễn |
+| Hạng mục | Mã HV | Người phụ trách |
+|----------|--------|-----------------|
+| Thiết kế SPEC | 2A202600741 | Đàm Mạnh Dũng |
+| Xây dựng Prototype | 2A202600846 | Nguyễn Hoàng Thanh Tùng |
+| Lập trình UI/UX | 2A202600755 | Lê Bá Chiến |
+| Lập trình Backend/API | 2A202600741 | Đàm Mạnh Dũng |
+| AI workflow / Prompt | 2A202600846 | Nguyễn Hoàng Thanh Tùng |
+| Quản lý repo (Documentation)| 2A202600741 | Đàm Mạnh Dũng |
+| Testing | 2A202600755 | Lê Bá Chiến |
+| Kịch bản Demo script | 2A202600755 | Lê Bá Chiến |
 
 ---
 
 ## 📂 Cấu trúc repo
 
-```
-├── README.md                 ← Bạn đang đây
-├── spec/                     ← Tài liệu thiết kế
-│   ├── product-spec.md       
-│   ├── user-flow.md          
-│   ├── ai-workflow.md        
-│   └── demo-script.md        
-├── codebase/                 ← Source code (Hoàn chỉnh)
-│   ├── data_hotel.py         ← DB 21 khách sạn
-│   ├── system_prompts.txt    ← Prompt chính
-│   ├── backend/              ← Code backend xử lý AI
-│   └── web/                  ← Code frontend React UI
-└── slide/                    ← Slide thuyết trình gốc
-```
+- `README.md`: Tài liệu tổng quan dự án (bạn đang đọc).
+- `spec/`: Chứa các tài liệu thiết kế (Đặc tả sản phẩm, Luồng người dùng, Kịch bản AI workflow, và Kịch bản Demo chấm thi).
+- `codebase/`: Chứa toàn bộ mã nguồn của ứng dụng.
+
+---
+
+## 🔗 Link nhanh
+
+- **Hướng dẫn chạy code (Dành cho Giảng viên/Dev):** [Xem hướng dẫn cài đặt trong codebase/README.md](codebase/README.md)
+- **Link Demo Prototype:** *(Ứng dụng chưa deploy public, vui lòng chạy theo hướng dẫn ở link trên)*

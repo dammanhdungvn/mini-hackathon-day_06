@@ -1,77 +1,96 @@
-# Prototype Overview
+# Developer Guide — Voyage Intelligence
 
-**Voyage Intelligence** là một AI Hotel Advisor dành cho đảo Phú Quốc.
-Prototype này đóng vai trò như một chuyên gia tư vấn lưu trú, giúp du khách dễ dàng tìm kiếm khách sạn phù hợp với sở thích, ngân sách và mục đích chuyến đi thay vì phải lướt qua hàng trăm lựa chọn.
+Tài liệu này hướng dẫn cách cài đặt, chạy và phát triển ứng dụng Voyage Intelligence ở môi trường Local.
 
-**Chức năng chính:**
-- Chatbot giao tiếp bằng Tiếng Việt tự nhiên.
-- Ứng dụng mô hình AI có khả năng **Tool-calling** để truy xuất dữ liệu từ CSDL (21 khách sạn Phú Quốc).
-- Tự động lọc khách sạn dựa trên ngữ cảnh (ngân sách, loại hình du lịch, tiện ích yêu cầu).
-- Bảng điều khiển (Dashboard) 3 cột hiển thị: Thông số hành trình, Danh sách khách sạn phù hợp, và Giao diện trò chuyện.
-- Chế độ Admin/Developer Mode giúp dễ dàng quan sát cách AI trích xuất (parse) các tiêu chí và gọi tool.
-- Hỗ trợ 4 kịch bản mẫu (Demo Cases) có sẵn để trình diễn tính năng.
+## 1. Prototype Overview
+Ứng dụng web chat AI sử dụng tool-calling để gợi ý khách sạn. Backend đóng vai trò như một proxy server đọc system prompt, xử lý dữ liệu database tĩnh và gọi API AI. Frontend hiển thị giao diện chat và danh sách khách sạn.
 
 ---
 
-## Công nghệ sử dụng
-
-- **Frontend Framework**: React 19 + TypeScript + Vite 6
-- **Backend/API**: Vite Middleware (Node.js) — proxy API calls trực tiếp không cần server riêng biệt.
-- **Database**: Dữ liệu tĩnh lưu dưới dạng Python List trong `data_hotel.py` (21 khách sạn) và được backend parse.
-- **AI Model/Provider**: Alibaba Model Studio (DashScope) — Model `qwen3-max` qua chuẩn OpenAI-compatible.
-- **UI Library**: TailwindCSS v4, Lucide React (Icons).
-- **Deploy Platform**: Localhost (Chưa deploy public).
+## 2. Tech Stack thực tế
+- **Framework:** React 19, Vite 6
+- **Language:** TypeScript (Frontend UI & Backend Logic)
+- **Database:** Dữ liệu tĩnh lưu dạng file (`data_hotel.py` chứa danh sách 21 khách sạn).
+- **AI Provider/Model:** Alibaba Model Studio (DashScope) — Model `qwen3-max`.
+- **UI Library:** TailwindCSS v4, Lucide React (Icons).
+- **Tools:** Node.js, npm.
 
 ---
 
-## Cách chạy prototype
+## 3. Local Development
 
-### 1. Yêu cầu môi trường
+### Yêu cầu (Requirements)
 - **Node.js** ≥ 18
 - **npm** ≥ 9
-- **API Key** từ Alibaba Model Studio (DashScope)
+- **API Key** từ Alibaba Model Studio.
 
-### 2. Install dependencies
-Mở terminal, di chuyển vào thư mục code và cài đặt các thư viện cần thiết:
+### Cài đặt (Install dependencies)
+Mở terminal và di chuyển vào thư mục code frontend (Vite):
 ```bash
 cd web
 npm install
 ```
 
-### 3. Setup biến môi trường
-Tạo file môi trường tại thư mục backend bằng template có sẵn:
+### Cấu hình (Setup environment)
+Tạo file biến môi trường ở thư mục backend:
 ```bash
 cp backend/.env.example backend/.env
 ```
-Mở file `backend/.env` và cập nhật API Key thật của bạn:
-```env
-DASHSCOPE_API_KEY=<your-api-key-here>
-DASHSCOPE_BASE_URL=https://dashscope-intl.aliyuncs.com/compatible-mode/v1
-DASHSCOPE_MODEL=qwen3-max
-```
+Mở `backend/.env` và cập nhật bằng API Key thật của bạn.
 
-### 4. Start project
-Khởi động máy chủ dev (Vite sẽ đóng vai trò cả Frontend Server lẫn Backend API Middleware):
+### Khởi chạy (Run project)
+Khởi động development server:
 ```bash
 cd web
 npm run dev
 ```
-Mở trình duyệt tại: **http://localhost:3000**
+Trình duyệt sẽ mở sẵn ở: **http://localhost:3000**
+
+### Biên dịch (Build project)
+Biên dịch code cho môi trường production:
+```bash
+cd web
+npm run build
+```
 
 ---
 
-## Phân công thành viên
+## 4. Environment Variables
 
-*(Vui lòng điền tên hoặc mã sinh viên thực tế của nhóm vào các mục dưới đây trước khi nộp bài)*
+Dự án yêu cầu cấu hình các biến môi trường sau trong file `backend/.env` (tham khảo cấu trúc tại `backend/.env.example`):
 
-| Hạng mục | Người phụ trách |
-|----------|-----------------|
-| Viết SPEC (Tài liệu đặc tả) | Tùng Nguyễn |
-| Xây dựng Prototype | Tùng Nguyễn |
-| Prompt design & testing | Tùng Nguyễn |
-| AI workflow (Logic Tool-calling) | Tùng Nguyễn |
-| Lập trình Giao diện (UI) | Tùng Nguyễn |
-| Lập trình Backend/API | Tùng Nguyễn |
-| Quản lý repo & Chuẩn hóa | Tùng Nguyễn |
-| Testing (Kiểm thử chức năng) | Tùng Nguyễn |
-| Xây dựng Kịch bản demo | Tùng Nguyễn |
+- `DASHSCOPE_API_KEY`: API Key để kết nối với mô hình AI.
+- `DASHSCOPE_BASE_URL`: URL Base API của Alibaba Model Studio.
+- `DASHSCOPE_MODEL`: Tên mô hình được cấu hình để gọi.
+
+*(Tuyệt đối không chia sẻ hoặc push file chứa secret thật lên Github).*
+
+---
+
+## 5. Project Structure
+
+Giải thích cấu trúc mã nguồn bên trong thư mục `codebase/`:
+
+```
+codebase/
+├── data_hotel.py         # Cơ sở dữ liệu 21 khách sạn Phú Quốc.
+├── system_prompts.txt    # System prompt định nghĩa hành vi của AI.
+├── backend/              # Mã nguồn xử lý Backend API.
+│   ├── .env.example      # File biến môi trường mẫu.
+│   ├── advisorCore.ts    # Logic filter khách sạn và parse dữ liệu.
+│   ├── aiAdvisor.ts      # Chịu trách nhiệm gọi Alibaba API & tool-calling.
+│   ├── localAdvisor.ts   # Helper script client-side.
+│   └── tools.py          # Script python mockup/tham khảo (không chạy chính).
+└── web/                  # Giao diện Frontend React + Vite.
+    ├── index.html        # Entry point của ứng dụng web.
+    ├── vite.config.ts    # Cấu hình Vite & gắn Middleware API server (/api/*).
+    └── src/
+        ├── App.tsx       # Component trang gốc, chia layout 3 cột.
+        ├── index.css     # CSS gốc và cấu hình Tailwind.
+        └── components/   # Thư mục chứa các React Component (Chat, HotelList..).
+```
+
+---
+
+## 6. Developer Notes
+- **Middleware Architecture:** Để tiện cho việc chấm thi (chỉ cần chạy `npm run dev`), ứng dụng không dựng server Express độc lập. Thay vào đó, API Backend được chạy ngầm dưới dạng một plugin middleware gắn trong Vite (xem cấu hình ở `vite.config.ts` mục `configureServer`). Nếu muốn deploy ứng dụng này lên production ở Render hoặc Vercel, dev cần tách logic API sang một Express app riêng.
