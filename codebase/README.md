@@ -13,71 +13,65 @@ Prototype này đóng vai trò như một chuyên gia tư vấn lưu trú, giúp
 
 ---
 
-# Tech Stack
+## Công nghệ sử dụng
 
-- **Frontend framework:** React 19 + TypeScript + Vite 6
-- **Backend framework:** Vite Middleware (Node.js) — Đóng vai trò proxy API, không dùng server riêng.
-- **Database:** Dữ liệu tĩnh Python list (`data_hotel.py`) được parse bằng Regex.
-- **AI model/provider:** Alibaba Model Studio (Qwen3-max) thông qua chuẩn OpenAI-compatible API.
-- **UI library:** TailwindCSS v4, Lucide React (Icons).
-- **Deployment platform:** Chưa deploy (Chạy local/Localhost).
+- **Frontend Framework**: React 19 + TypeScript + Vite 6
+- **Backend/API**: Vite Middleware (Node.js) — proxy API calls trực tiếp không cần server riêng biệt.
+- **Database**: Dữ liệu tĩnh lưu dưới dạng Python List trong `data_hotel.py` (21 khách sạn) và được backend parse.
+- **AI Model/Provider**: Alibaba Model Studio (DashScope) — Model `qwen3-max` qua chuẩn OpenAI-compatible.
+- **UI Library**: TailwindCSS v4, Lucide React (Icons).
+- **Deploy Platform**: Localhost (Chưa deploy public).
 
 ---
 
-# Installation
+## Cách chạy prototype
 
-### 1. Clone project
-```bash
-# Clone repo
-git clone <repository_url>
-cd <thư_mục_chứa_repo>
-```
+### 1. Yêu cầu môi trường
+- **Node.js** ≥ 18
+- **npm** ≥ 9
+- **API Key** từ Alibaba Model Studio (DashScope)
 
 ### 2. Install dependencies
+Mở terminal, di chuyển vào thư mục code và cài đặt các thư viện cần thiết:
 ```bash
-# Di chuyển vào thư mục web (nơi chứa package.json)
-cd codebase/web
-
-# Cài đặt các thư viện Node.js cần thiết
+cd web
 npm install
 ```
 
-### 3. Setup environment
+### 3. Setup biến môi trường
 Tạo file môi trường tại thư mục backend bằng template có sẵn:
 ```bash
-cp ../backend/.env.example ../backend/.env
+cp backend/.env.example backend/.env
 ```
-Mở file `codebase/backend/.env` và cập nhật API Key thật của bạn (lấy từ Alibaba DashScope).
+Mở file `backend/.env` và cập nhật API Key thật của bạn:
+```env
+DASHSCOPE_API_KEY=<your-api-key-here>
+DASHSCOPE_BASE_URL=https://dashscope-intl.aliyuncs.com/compatible-mode/v1
+DASHSCOPE_MODEL=qwen3-max
+```
 
-### 4. Run development server
+### 4. Start project
+Khởi động máy chủ dev (Vite sẽ đóng vai trò cả Frontend Server lẫn Backend API Middleware):
 ```bash
-# Đảm bảo bạn đang ở thư mục codebase/web
+cd web
 npm run dev
 ```
-Trình duyệt sẽ khởi động sẵn hoặc bạn có thể truy cập bằng tay tại: `http://localhost:3000`
+Mở trình duyệt tại: **http://localhost:3000**
 
 ---
 
-# Environment Variables
+## Phân công thành viên
 
-Dự án yêu cầu các biến môi trường sau trong file `codebase/backend/.env` để hoạt động:
+*(Vui lòng điền tên hoặc mã sinh viên thực tế của nhóm vào các mục dưới đây trước khi nộp bài)*
 
-- `DASHSCOPE_API_KEY`: API Key để xác thực với Alibaba DashScope (Bắt buộc).
-- `DASHSCOPE_BASE_URL`: URL Base API của Alibaba Model Studio (VD: `https://dashscope-intl.aliyuncs.com/compatible-mode/v1`).
-- `DASHSCOPE_MODEL`: Tên model muốn dùng (VD: `qwen3-max`).
-
-*(Vui lòng tham khảo file `codebase/backend/.env.example` để biết định dạng chi tiết, tuyệt đối KHÔNG commit file `.env` chứa secret key lên repo).*
-
----
-
-# Team Contribution
-
-*(Vui lòng thay thế bằng tên/Mã SV thực tế của nhóm)*
-
-- **Prompt design/testing:** Tùng Nguyễn
-- **UI development:** Tùng Nguyễn
-- **Backend/API (Vite Middleware):** Tùng Nguyễn
-- **AI integration (Tool-calling logic):** Tùng Nguyễn
-- **Repository management & Codebase structuring:** Tùng Nguyễn
-- **Demo script & User Flow Design:** Tùng Nguyễn
-- **Documentation (Spec docs, README):** Tùng Nguyễn
+| Hạng mục | Người phụ trách |
+|----------|-----------------|
+| Viết SPEC (Tài liệu đặc tả) | Tùng Nguyễn |
+| Xây dựng Prototype | Tùng Nguyễn |
+| Prompt design & testing | Tùng Nguyễn |
+| AI workflow (Logic Tool-calling) | Tùng Nguyễn |
+| Lập trình Giao diện (UI) | Tùng Nguyễn |
+| Lập trình Backend/API | Tùng Nguyễn |
+| Quản lý repo & Chuẩn hóa | Tùng Nguyễn |
+| Testing (Kiểm thử chức năng) | Tùng Nguyễn |
+| Xây dựng Kịch bản demo | Tùng Nguyễn |

@@ -8,96 +8,70 @@
 
 ---
 
-## 📋 Mô tả sản phẩm
+## Cách chạy prototype
 
-Voyage Intelligence là một AI Hotel Advisor dành cho đảo Phú Quốc. Hệ thống sử dụng mô hình ngôn ngữ Qwen3-max của Alibaba với cơ chế **tool-calling** để:
-
-- **Hiểu nhu cầu** du khách qua hội thoại tự nhiên bằng tiếng Việt
-- **Lọc thông minh** database 21 khách sạn theo ngân sách, khu vực, mục đích du lịch
-- **Tư vấn cá nhân hóa** với lý do cụ thể tại sao từng khách sạn phù hợp
-
----
-
-## 👥 Thành viên nhóm
-
-| Mã HV | Họ tên | Vai trò |
-|--------|--------|---------|
-| — | Tùng Nguyễn | Tech Lead / Full-stack |
-| — | (Thành viên 2) | (Vai trò) |
-| — | (Thành viên 3) | (Vai trò) |
-
-> ⚠️ *Điền thông tin thành viên thực tế trước khi nộp bài.*
-
----
-
-## 📌 Phân công
-
-| Hạng mục | Người thực hiện |
-|----------|-----------------|
-| SPEC & Product Design | — |
-| Prototype & UI/UX | — |
-| Backend / API (Vite Middleware) | — |
-| AI Workflow (Prompt + Tool-calling) | — |
-| Data (Hotel Database) | — |
-| Testing & Demo Script | — |
-| Slide & Thuyết trình | — |
-
-> ⚠️ *Điền phân công thực tế trước khi nộp bài.*
-
----
-
-## 🛠 Tech Stack
-
-| Layer | Công nghệ |
-|-------|-----------|
-| Frontend | React 19 + TypeScript + TailwindCSS v4 + Vite 6 |
-| Backend | Vite Middleware (Node.js, TypeScript) — không server riêng |
-| AI Model | Alibaba Model Studio — Qwen3-max |
-| API Style | OpenAI-compatible REST API với tool-calling |
-| Database | File Python `data_hotel.py` (21 khách sạn Phú Quốc) |
-| Icons | Lucide React |
-
----
-
-## 🚀 Cài đặt & Chạy
-
-### Yêu cầu
-
+### 1. Yêu cầu môi trường
 - **Node.js** ≥ 18
 - **npm** ≥ 9
 - **API Key** từ Alibaba Model Studio (DashScope)
 
-### Bước 1: Clone & cài dependencies
-
+### 2. Install dependencies
+Mở terminal, di chuyển vào thư mục code và cài đặt các thư viện cần thiết:
 ```bash
 cd codebase/web
 npm install
 ```
 
-### Bước 2: Cấu hình API Key
-
-Tạo file `codebase/backend/.env` từ template:
-
+### 3. Setup biến môi trường
+Tạo file môi trường tại thư mục backend bằng template có sẵn:
 ```bash
 cp codebase/backend/.env.example codebase/backend/.env
 ```
-
-Sửa file `.env`:
-
+Mở file `codebase/backend/.env` và cập nhật API Key thật của bạn:
 ```env
 DASHSCOPE_API_KEY=<your-api-key-here>
 DASHSCOPE_BASE_URL=https://dashscope-intl.aliyuncs.com/compatible-mode/v1
 DASHSCOPE_MODEL=qwen3-max
 ```
 
-### Bước 3: Chạy app
-
+### 4. Start project
+Khởi động máy chủ dev (Vite sẽ đóng vai trò cả Frontend Server lẫn Backend API Middleware):
 ```bash
 cd codebase/web
 npm run dev
 ```
-
 Mở trình duyệt tại: **http://localhost:3000**
+
+*(Lưu ý: Ứng dụng hiện tại chỉ chạy ở môi trường Local/Localhost, chưa được deploy public. Hãy chạy theo hướng dẫn trên để xem demo).*
+
+---
+
+## Công nghệ sử dụng
+
+- **Frontend Framework**: React 19 + TypeScript + Vite 6
+- **Backend/API**: Vite Middleware (Node.js) — proxy API calls trực tiếp không cần server riêng biệt.
+- **Database**: Dữ liệu tĩnh lưu dưới dạng Python List trong `codebase/data_hotel.py` (21 khách sạn) và được backend parse.
+- **AI Model/Provider**: Alibaba Model Studio (DashScope) — Model `qwen3-max` qua chuẩn OpenAI-compatible.
+- **UI Library**: TailwindCSS v4, Lucide React (Icons).
+- **Deploy Platform**: Localhost (Chưa deploy public).
+
+---
+
+## Phân công thành viên
+
+*(Vui lòng điền tên hoặc mã sinh viên thực tế của nhóm vào các mục dưới đây trước khi nộp bài)*
+
+| Hạng mục | Người phụ trách |
+|----------|-----------------|
+| Viết SPEC (Tài liệu đặc tả) | Tùng Nguyễn |
+| Xây dựng Prototype | Tùng Nguyễn |
+| Prompt design & testing | Tùng Nguyễn |
+| AI workflow (Logic Tool-calling) | Tùng Nguyễn |
+| Lập trình Giao diện (UI) | Tùng Nguyễn |
+| Lập trình Backend/API | Tùng Nguyễn |
+| Quản lý repo & Chuẩn hóa | Tùng Nguyễn |
+| Testing (Kiểm thử chức năng) | Tùng Nguyễn |
+| Xây dựng Kịch bản demo | Tùng Nguyễn |
 
 ---
 
@@ -106,30 +80,14 @@ Mở trình duyệt tại: **http://localhost:3000**
 ```
 ├── README.md                 ← Bạn đang đây
 ├── spec/                     ← Tài liệu thiết kế
-│   ├── product-spec.md       ← Đặc tả sản phẩm
-│   ├── user-flow.md          ← Luồng người dùng
-│   ├── ai-workflow.md        ← Luồng AI & tool-calling
-│   └── demo-script.md        ← Kịch bản demo
-├── codebase/                 ← Source code
-│   ├── data_hotel.py         ← Database 21 khách sạn Phú Quốc
-│   ├── system_prompts.txt    ← System prompt cho AI
-│   ├── backend/              ← Logic AI advisor (TypeScript)
-│   └── web/                  ← React frontend (Vite)
-└── slide/                    ← Slide thuyết trình
-```
-
----
-
-## 🔄 Luồng hoạt động chính
-
-```
-User nhập câu hỏi
-    → POST /api/chat (Vite middleware)
-    → Đọc system_prompts.txt
-    → Gọi Alibaba lần 1 (với tool definition)
-    → AI tool-call fetch_matching_hotels
-        → Lọc hotel DB theo tiêu chí
-        → Gửi tool result về Alibaba
-    → Gọi Alibaba lần 2 (với context đầy đủ)
-    → Trả response cho frontend
+│   ├── product-spec.md       
+│   ├── user-flow.md          
+│   ├── ai-workflow.md        
+│   └── demo-script.md        
+├── codebase/                 ← Source code (Hoàn chỉnh)
+│   ├── data_hotel.py         ← DB 21 khách sạn
+│   ├── system_prompts.txt    ← Prompt chính
+│   ├── backend/              ← Code backend xử lý AI
+│   └── web/                  ← Code frontend React UI
+└── slide/                    ← Slide thuyết trình gốc
 ```
