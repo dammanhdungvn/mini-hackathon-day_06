@@ -22,7 +22,32 @@ import AIChat from './components/AIChat';
 import Modal from './components/Modal';
 
 import { TripInfo, Hotel, Message, ViewMode, DemoCase } from './types';
-import { DEMO_CASES, getMatchedHotels } from './data';
+
+const LOCAL_HAPPY_CASE = {
+  trip: {
+    destination: 'Phú Quốc',
+    budget: '2.0M VND / đêm',
+    budgetVal: 2000,
+    guests: 2,
+    travelStyle: 'Yên tĩnh, cặp đôi',
+    preference: 'Sát bãi biển, nghỉ dưỡng'
+  },
+  analysis: 'Tìm thấy các khách sạn phù hợp tại Phú Quốc. Top lựa chọn dưới đây được chọn lọc dựa trên phong cách yên tĩnh sát biển và ngân sách của bạn.',
+  messages: [
+    {
+      id: 'h1',
+      sender: 'user',
+      text: 'Tôi đi Phú Quốc 2 người, ngân sách 2 triệu mỗi đêm, muốn gần biển và yên tĩnh.',
+      timestamp: '10:42'
+    },
+    {
+      id: 'h2',
+      sender: 'assistant',
+      text: `Chào bạn! Mình đã tìm thấy các khách sạn ở Phú Quốc đáp ứng các yêu cầu của bạn: sát biển, không gian yên tĩnh và trong tầm giá 2 triệu VNĐ.\n\nNổi bật nhất là **SOL by Meliá** với bãi biển riêng tuyệt đẹp (giá 1.8M/đêm, match 95%). Ngoài ra, **Lahana Resort** (1.6M/đêm, match 90%) cũng rất phù hợp nếu bạn yêu thích không gian xanh sườn đồi và hồ bơi vô cực ngắm hoàng hôn ngút ngàn.\n\nBạn muốn tìm hiểu kỹ hơn hay đặt phòng của resort nào trong số này ạ?`,
+      timestamp: '10:43'
+    }
+  ]
+};
 
 export default function App() {
   // Core Application Layout States
@@ -31,33 +56,71 @@ export default function App() {
   const [isAiConnected, setIsAiConnected] = useState<boolean>(true);
   
   // Trip & matching hotel list state
-  const [trip, setTrip] = useState<TripInfo>(DEMO_CASES.happy.trip);
+  const [trip, setTrip] = useState<TripInfo>(LOCAL_HAPPY_CASE.trip);
   const [matchedHotels, setMatchedHotels] = useState<Hotel[]>([]);
-  const [analysisText, setAnalysisText] = useState<string>(DEMO_CASES.happy.analysis);
+  const [analysisText, setAnalysisText] = useState<string>(LOCAL_HAPPY_CASE.analysis);
   
   // Chat context state
-  const [messages, setMessages] = useState<Message[]>(DEMO_CASES.happy.messages);
+  const [messages, setMessages] = useState<Message[]>(LOCAL_HAPPY_CASE.messages);
   const [isGenerating, setIsGenerating] = useState<boolean>(false);
+
+  // Cached demo cases loaded from API (with fallback)
+  const [demoCases, setDemoCases] = useState<any>({ happy: LOCAL_HAPPY_CASE });
 
   // Modals state
   const [modalType, setModalType] = useState<'book' | 'details' | 'settings' | 'help' | null>(null);
   const [selectedHotel, setSelectedHotel] = useState<Hotel | null>(null);
 
+  // Fetch demo cases on mount
+  useEffect(() => {
+    fetch('/api/demo-cases')
+      .then(res => res.json())
+      .then(data => {
+        if (data && data.happy) {
+          setDemoCases(data);
+          // If user hasn't interacted yet, update initial states from server
+          if (activeDemo === 'happy') {
+            setTrip(data.happy.trip);
+            setMessages(data.happy.messages);
+            setAnalysisText(data.happy.analysis);
+          }
+        }
+      })
+      .catch(err => console.warn('FastAPI demo cases fetch failed, using local backup'));
+  }, []);
+
   // Recalculate matched hotels on trip change
   useEffect(() => {
-    const list = getMatchedHotels(trip);
-    setMatchedHotels(list);
+    if (!trip.destination) {
+      setMatchedHotels([]);
+      return;
+    }
+
+    fetch('/api/hotels', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(trip)
+    })
+      .then(res => res.json())
+      .then(list => {
+        if (Array.isArray(list)) {
+          setMatchedHotels(list);
+        }
+      })
+      .catch(err => console.error('Failed to fetch matched hotels:', err));
   }, [trip]);
 
   // Scenario trigger handler
   const triggerDemo = (demo: DemoCase) => {
     setActiveDemo(demo);
-    if (DEMO_CASES[demo]) {
-      setTrip(DEMO_CASES[demo].trip);
-      setMessages(DEMO_CASES[demo].messages);
-      setAnalysisText(DEMO_CASES[demo].analysis);
+    const selected = demoCases[demo];
+    if (selected) {
+      setTrip(selected.trip);
+      setMessages(selected.messages);
+      setAnalysisText(selected.analysis);
     }
   };
+
 
   // Clear chat logs
   const clearChat = () => {
