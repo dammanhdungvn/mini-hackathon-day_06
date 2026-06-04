@@ -176,7 +176,7 @@ export default function Sidebar({
             <span className={`text-[9px] px-2 py-0.5 rounded-full font-bold ${
               'bg-emerald-100 text-emerald-800'
             }`}>
-              QWEN3-MAX
+              ALIBABA
             </span>
           </div>
 
@@ -184,13 +184,13 @@ export default function Sidebar({
             <div className="flex items-center justify-between">
               <span className="text-xs text-gray-600 font-medium">Alibaba Model Studio</span>
               <span className="text-[10px] bg-[#14B8A6]/10 text-[#0f766e] font-bold px-2 py-1 rounded-full">
-                Required
+                Live
               </span>
             </div>
             
             <div className="flex items-center gap-2 text-[11px] text-gray-500">
               <Wifi className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
-              <span>Bắt buộc dùng API Alibaba `qwen3-max` để trả lời khách hàng.</span>
+              <span>Đọc system_promts.txt, gọi tool fetch_matching_hotels rồi gửi context cho AI.</span>
             </div>
           </div>
         </div>

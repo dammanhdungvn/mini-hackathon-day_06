@@ -259,7 +259,7 @@ export default function TripSummaryCard({ trip, onUpdateTrip }: TripSummaryCardP
       {/* Dynamic help state */}
       {!isEditing && (
         <div id="summary-assistant-tip" className="bg-[#f0f5ff]/60 border border-[#e5eeff] rounded-xl p-3 text-[11px] text-slate-600 mt-4 leading-relaxed">
-          <p>💡 <span className="font-bold text-[#0F4C81]">Tìm kiếm thông minh:</span> Chỉnh sửa các tham số trên và AI sẽ tự động phân loại, xếp hạng lại danh sách khu nghỉ dưỡng chuẩn nhất cho bạn.</p>
+          <p>💡 <span className="font-bold text-[#0F4C81]">Tìm kiếm thông minh:</span> Chỉnh sửa các tham số trên để tool lọc và xếp hạng lại danh sách khu nghỉ dưỡng phù hợp.</p>
         </div>
       )}
     </div>

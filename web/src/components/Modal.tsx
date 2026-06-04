@@ -23,7 +23,7 @@ export default function Modal({ type, onClose, activeHotel }: ModalProps) {
             {type === 'book' && 'Xác nhận Đặt phòng'}
             {type === 'details' && 'Thông tin Dự án Nghỉ dưỡng'}
             {type === 'settings' && 'Bảng điều khiển hệ thống'}
-            {type === 'help' && 'Cẩm nang sử dụng Chatbot AI'}
+            {type === 'help' && 'Cẩm nang sử dụng demo tư vấn'}
           </h3>
           <button
             id="close-modal-btn"
@@ -110,7 +110,7 @@ export default function Modal({ type, onClose, activeHotel }: ModalProps) {
               <div className="flex justify-between items-center py-2 px-3 bg-teal-50 border border-teal-150 rounded-xl">
                 <div className="flex items-center gap-1.5 text-[#14B8A6] font-bold text-xs">
                   <Flame className="w-4 h-4 fill-teal-100" />
-                  <span>Xếp hạng tương thích AI</span>
+                  <span>Xếp hạng tương thích</span>
                 </div>
                 <span className="text-xs font-bold font-mono text-[#14B8A6]">{activeHotel.matchPercent}% Phù hợp</span>
               </div>
@@ -150,21 +150,21 @@ export default function Modal({ type, onClose, activeHotel }: ModalProps) {
           {type === 'settings' && (
             <div id="modal-settings-case" className="space-y-4">
               <p className="text-xs text-gray-500 leading-relaxed">
-                Voyage Intelligence đang chạy theo luồng demo local: giao diện gửi yêu cầu vào server trong thư mục web, server xử lý dữ liệu khách sạn và bắt buộc gọi Alibaba Model Studio để trả lời khách hàng.
+                Voyage Intelligence đang chạy theo luồng test AI: Vite middleware đọc backend/.env, đọc system_promts.txt, gọi tool fetch_matching_hotels trong backend rồi gửi tool result sang Alibaba để AI trả lời khách hàng.
               </p>
 
               <div className="space-y-3.5">
                 <div className="p-4 bg-slate-50 border border-slate-100 rounded-2xl space-y-3">
                   <div className="flex justify-between items-center text-xs">
-                    <span className="font-bold text-gray-500">Mô hình AI chỉ định:</span>
+                    <span className="font-bold text-gray-500">Model đang test:</span>
                     <span className="bg-[#e5eeff] text-[#0F4C81] px-2 py-0.5 rounded-full font-mono font-bold text-[10px]">qwen3-max</span>
                   </div>
 
                   <div className="flex justify-between items-center text-xs">
-                    <span className="font-bold text-gray-500">Khóa DashScope:</span>
+                    <span className="font-bold text-gray-500">Khóa API:</span>
                     <span className="text-emerald-600 font-sans font-bold flex items-center gap-1 bg-emerald-50 px-2 py-0.5 rounded-md text-[10px]">
                       <Shield className="w-3 h-3 text-emerald-500" />
-                      <span>Chỉ đọc ở server local</span>
+                      <span>Đọc ở backend/.env</span>
                     </span>
                   </div>
 
@@ -175,9 +175,9 @@ export default function Modal({ type, onClose, activeHotel }: ModalProps) {
                 </div>
 
                 <div className="space-y-1.5">
-                  <span className="block text-[11px] font-bold text-gray-400 uppercase tracking-wider">Hệ thống Prompt nội tại</span>
+                  <span className="block text-[11px] font-bold text-gray-400 uppercase tracking-wider">System prompt được nạp</span>
                   <div className="p-3 bg-gray-900 text-amber-200 rounded-xl font-mono text-[10px] leading-relaxed max-h-36 overflow-y-auto">
-                    {`System-Instruction: You are "Voyage Intelligence" a friendly, high-trust digital hotel concierge powered by Alibaba Qwen3-Max. Your goal is to guide standard tourist bookings by analyzing budget, styles, and destinations in Vietnam. Respond clearly, cleanly, and compactly in beautiful Vietnamese.`}
+                    {`system_promts.txt -> backend/aiAdvisor.ts -> Alibaba. Tool fetch_matching_hotels được chạy trước hoặc theo tool call của model, rồi AI trả lời dựa trên tool result.`}
                   </div>
                 </div>
               </div>
@@ -191,7 +191,7 @@ export default function Modal({ type, onClose, activeHotel }: ModalProps) {
                 <HelpCircle className="w-10 h-10 text-[#0F4C81] shrink-0" />
                 <div>
                   <h4 className="font-sans font-bold text-[#0F4C81] text-sm">Cẩm nang Chợ giúp Khách hàng</h4>
-                  <p className="text-[11px] text-[#0F4C81]/80 mt-0.5">Chúng tôi đã tích hợp trợ lý AI sẵn sàng phân tích và lên lộ trình cho bạn.</p>
+                  <p className="text-[11px] text-[#0F4C81]/80 mt-0.5">AI sẽ dùng prompt hiện tại và dữ liệu tool để tư vấn khách sạn.</p>
                 </div>
               </div>
 
@@ -207,7 +207,7 @@ export default function Modal({ type, onClose, activeHotel }: ModalProps) {
                 <div className="flex gap-3">
                   <div className="w-6 h-6 rounded-full bg-[#0F4C81]/10 text-[#0F4C81] flex items-center justify-center font-bold font-sans text-xs shrink-0">2</div>
                   <div>
-                    <h5 className="font-sans font-bold text-slate-800 text-xs">Quan sát bảng xếp hạng AI</h5>
+                    <h5 className="font-sans font-bold text-slate-800 text-xs">Quan sát bảng xếp hạng nội bộ</h5>
                     <p className="text-xs text-gray-500 mt-1 leading-relaxed">Thuật toán phân tích nội tại của chúng tôi sẽ tính toán và hiển thị các khách sạn tốt nhất theo thứ tự phần trăm match giảm dần.</p>
                   </div>
                 </div>

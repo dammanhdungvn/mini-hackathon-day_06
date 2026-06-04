@@ -1,27 +1,18 @@
 # Voyage Intelligence Web
 
-Thư mục này chỉ chứa giao diện React và server proxy nhẹ.
+React/Vite UI cho demo test AI prompt. Khi chạy `npm run dev`, Vite middleware cung cấp `/api/chat` để gọi Alibaba bằng cấu hình trong `../backend/.env`.
 
-## Chạy Web
+## Chạy
 
 ```powershell
 npm install
 npm run dev
 ```
 
-Web chạy ở:
+Mở:
 
 ```text
 http://localhost:3000
 ```
 
-## Cấu Hình
-
-`web/.env`:
-
-```env
-BACKEND_URL=http://127.0.0.1:8000
-APP_URL=http://localhost:3000
-```
-
-API key Alibaba không đặt trong web. Paste `DASHSCOPE_API_KEY` vào `backend/.env`.
+Prompt đang test nằm ở `../system_promts.txt`.

@@ -9,6 +9,11 @@ import AIChat from './components/AIChat';
 import Modal from './components/Modal';
 
 import { TripInfo, Hotel, Message, ViewMode, DemoCase } from './types';
+import {
+  DEMO_CASES,
+  createTripAnalysis,
+  getMatchedHotelsForTrip,
+} from '../../backend/localAdvisor';
 
 const EMPTY_TRIP: TripInfo = {
   destination: '',
@@ -19,73 +24,37 @@ const EMPTY_TRIP: TripInfo = {
   preference: '',
 };
 
+const INITIAL_DEMO = DEMO_CASES.happy;
+
 export default function App() {
   // Core Application Layout States
   const [viewMode, setViewMode] = useState<ViewMode>('user');
   const [activeDemo, setActiveDemo] = useState<DemoCase>('happy');
   
   // Trip & matching hotel list state
-  const [trip, setTrip] = useState<TripInfo>(EMPTY_TRIP);
+  const [trip, setTrip] = useState<TripInfo>(INITIAL_DEMO?.trip || EMPTY_TRIP);
   const [matchedHotels, setMatchedHotels] = useState<Hotel[]>([]);
-  const [analysisText, setAnalysisText] = useState<string>('Đang tải dữ liệu demo từ backend...');
+  const [analysisText, setAnalysisText] = useState<string>(
+    INITIAL_DEMO?.analysis || createTripAnalysis(EMPTY_TRIP),
+  );
   
   // Chat context state
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [messages, setMessages] = useState<Message[]>(INITIAL_DEMO?.messages || []);
   const [isGenerating, setIsGenerating] = useState<boolean>(false);
-
-  // Cached demo cases loaded from the local server.
-  const [demoCases, setDemoCases] = useState<any>({});
 
   // Modals state
   const [modalType, setModalType] = useState<'book' | 'details' | 'settings' | 'help' | null>(null);
   const [selectedHotel, setSelectedHotel] = useState<Hotel | null>(null);
 
-  // Fetch demo cases on mount
-  useEffect(() => {
-    fetch('/demo-cases')
-      .then(res => res.json())
-      .then(data => {
-        if (data && data.happy) {
-          setDemoCases(data);
-          // If user hasn't interacted yet, update initial states from server
-          if (activeDemo === 'happy') {
-            setTrip(data.happy.trip);
-            setMessages(data.happy.messages);
-            setAnalysisText(data.happy.analysis);
-          }
-        }
-      })
-      .catch(err => {
-        console.warn('Demo cases load failed:', err);
-        setAnalysisText('Chưa kết nối được backend. Hãy chạy FastAPI server ở cổng 8000.');
-      });
-  }, []);
-
   // Recalculate matched hotels on trip change
   useEffect(() => {
-    if (!trip.destination) {
-      setMatchedHotels([]);
-      return;
-    }
-
-    fetch('/hotels', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(trip)
-    })
-      .then(res => res.json())
-      .then(list => {
-        if (Array.isArray(list)) {
-          setMatchedHotels(list);
-        }
-      })
-      .catch(err => console.error('Failed to fetch matched hotels:', err));
+    setMatchedHotels(getMatchedHotelsForTrip(trip));
   }, [trip]);
 
   // Scenario trigger handler
   const triggerDemo = (demo: DemoCase) => {
     setActiveDemo(demo);
-    const selected = demoCases[demo];
+    const selected = demo === 'custom' ? null : DEMO_CASES[demo];
     if (selected) {
       setTrip(selected.trip);
       setMessages(selected.messages);
@@ -110,16 +79,10 @@ export default function App() {
   const handleUpdateTrip = (newTrip: TripInfo) => {
     setTrip(newTrip);
     setActiveDemo('custom');
-    
-    // Dynamic analyses text
-    if (!newTrip.destination) {
-      setAnalysisText('⚠️ Điểm đến hành trình đang trống. Hãy thiết lập mục tiêu Điểm đến ở bảng "Thông tin hành trình" bên trái để hệ thống nạp dữ liệu phân tích!');
-    } else {
-      setAnalysisText(`Phân tích tự động: Tìm thấy các khách sạn tương thích tại ${newTrip.destination}. Danh sách dưới đây được xếp hạng dựa trên tiêu chí ngân sách ${newTrip.budget} và phong cách ${newTrip.travelStyle}.`);
-    }
+    setAnalysisText(createTripAnalysis(newTrip));
   };
 
-  // Sends messages to Alibaba-backed local chat flow.
+  // Sends messages to Alibaba through the local Vite middleware.
   const handleSendMessage = async (text: string) => {
     const userMsg: Message = {
       id: `u-${Date.now()}`,
@@ -133,39 +96,37 @@ export default function App() {
     setIsGenerating(true);
 
     try {
-      const response = await fetch('/chat', {
+      const response = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           message: text,
-          trip: trip,
+          trip,
           demoCase: activeDemo,
-          history: updatedHist.slice(-6, -1), // Send recent context history
-        })
+          history: updatedHist.slice(-6, -1),
+        }),
       });
 
-      if (!response.ok) {
-        throw new Error('Local chat server returned failure status');
-      }
-
       const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || 'Alibaba chat request failed');
+      }
       
       const assistantMsg: Message = {
         id: `a-${Date.now()}`,
         sender: 'assistant',
-        text: data.text || 'Dạ, Voyage Intelligence chưa thể kết nối đầy đủ dữ liệu. Xin thử lại sau giây lát!',
+        text: data.text || 'Dạ, AI chưa trả về nội dung. Bạn thử hỏi lại ngắn gọn hơn nhé.',
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       };
 
       setMessages(prev => [...prev, assistantMsg]);
     } catch (err: any) {
-      console.error('Error contacting local chat route:', err);
+      console.error('Alibaba advisor error:', err);
       
-      // Fallback response inside client
       const apiErrorMsg: Message = {
         id: `a-err-${Date.now()}`,
         sender: 'assistant',
-        text: `Chưa thể kết nối Alibaba Model Studio để tạo câu trả lời. Vui lòng kiểm tra backend đang chạy và \`DASHSCOPE_API_KEY\` trong file \`backend/.env\` rồi thử lại.`,
+        text: `Chưa gọi được Alibaba để test prompt. Kiểm tra \`backend/.env\`, model/base URL và kết nối mạng. Lỗi: ${err.message}`,
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       };
       setMessages(prev => [...prev, apiErrorMsg]);
@@ -210,7 +171,7 @@ export default function App() {
           <div id="admin-mode-banner" className="bg-[#0b1c30] text-amber-200 px-8 py-2.5 flex items-center justify-between text-xs shrink-0 select-none animate-slide-down">
             <div className="flex items-center gap-2 font-mono">
               <Shield className="w-4 h-4 text-amber-400" />
-              <span>[ADMIN PORTAL] Đang giám sát luồng Token AI và các tham số Prompt (Voyage System Operational).</span>
+              <span>[ADMIN PORTAL] Đang test Alibaba tool-calling với system prompt từ file system_promts.txt.</span>
             </div>
             <button 
               onClick={() => setViewMode('user')}
@@ -233,7 +194,7 @@ export default function App() {
                 Kết quả tốt nhất cho chuyến đi
               </h2>
               <p className="text-xs text-gray-500 mt-1 font-sans">
-                Trợ lý AI giúp bạn chọn khách sạn phù hợp theo ngân sách, phong cách du lịch và vị trí mong muốn.
+                AI Hotel Advisor dùng tool lọc dữ liệu khách sạn rồi trả lời theo system prompt bạn đang test.
               </p>
             </div>
             
@@ -267,7 +228,7 @@ export default function App() {
               />
             </section>
 
-            {/* Column 3: AI Concierge chat (30%) */}
+            {/* Column 3: Alibaba advisor chat (30%) */}
             <section id="column-ai-chat" className="lg:col-span-4 h-full overflow-hidden flex flex-col">
               <AIChat 
                 messages={messages}

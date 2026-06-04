@@ -1,6 +1,6 @@
 {
   "name": "Voyage Intelligence",
-  "description": "Premium AI Hotel Advisor customized for Vietnamese resorts and high-fidelity trip itinerary match planning.",
+  "description": "AI prompt test demo for Phu Quoc hotel matching with Alibaba tool-calling.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_MODEL_API"]
 }
