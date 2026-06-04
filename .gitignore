@@ -1,1 +1,7 @@
 report_Tung.md
+.env
+.venv/
+backend/.env
+backend/*.log
+*.pyc
+__pycache__/

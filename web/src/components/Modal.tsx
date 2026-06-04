@@ -150,7 +150,7 @@ export default function Modal({ type, onClose, activeHotel }: ModalProps) {
           {type === 'settings' && (
             <div id="modal-settings-case" className="space-y-4">
               <p className="text-xs text-gray-500 leading-relaxed">
-                Để giữ an toàn cho khóa bảo mật API của bạn, Voyage Intelligence tự động lọc và ủy quyền tất cả các yêu cầu dịch vụ mô hình AI (Gemini 3.5) thông qua các điểm cuối Proxy máy chủ biệt lập.
+                Voyage Intelligence đang chạy theo luồng demo local: giao diện gửi yêu cầu vào server trong thư mục web, server xử lý dữ liệu khách sạn và chỉ gọi Gemini khi bạn bật Live AI.
               </p>
 
               <div className="space-y-3.5">
@@ -161,10 +161,10 @@ export default function Modal({ type, onClose, activeHotel }: ModalProps) {
                   </div>
 
                   <div className="flex justify-between items-center text-xs">
-                    <span className="font-bold text-gray-500">Bảo mật API Key:</span>
+                    <span className="font-bold text-gray-500">Khóa Gemini:</span>
                     <span className="text-emerald-600 font-sans font-bold flex items-center gap-1 bg-emerald-50 px-2 py-0.5 rounded-md text-[10px]">
                       <Shield className="w-3 h-3 text-emerald-500" />
-                      <span>Được bảo vệ trên Cloud-Server</span>
+                      <span>Chỉ đọc ở server local</span>
                     </span>
                   </div>
 

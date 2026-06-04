@@ -64,7 +64,7 @@ export default function App() {
   const [messages, setMessages] = useState<Message[]>(LOCAL_HAPPY_CASE.messages);
   const [isGenerating, setIsGenerating] = useState<boolean>(false);
 
-  // Cached demo cases loaded from API (with fallback)
+  // Cached demo cases loaded from the local server.
   const [demoCases, setDemoCases] = useState<any>({ happy: LOCAL_HAPPY_CASE });
 
   // Modals state
@@ -73,7 +73,7 @@ export default function App() {
 
   // Fetch demo cases on mount
   useEffect(() => {
-    fetch('/api/demo-cases')
+    fetch('/demo-cases')
       .then(res => res.json())
       .then(data => {
         if (data && data.happy) {
@@ -86,7 +86,7 @@ export default function App() {
           }
         }
       })
-      .catch(err => console.warn('FastAPI demo cases fetch failed, using local backup'));
+      .catch(err => console.warn('Demo cases load failed, using local backup'));
   }, []);
 
   // Recalculate matched hotels on trip change
@@ -96,7 +96,7 @@ export default function App() {
       return;
     }
 
-    fetch('/api/hotels', {
+    fetch('/hotels', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(trip)
@@ -147,7 +147,7 @@ export default function App() {
     }
   };
 
-  // Sends messages to Gemini proxy or smart mock
+  // Sends messages to the local chat flow or smart mock.
   const handleSendMessage = async (text: string) => {
     const userMsg: Message = {
       id: `u-${Date.now()}`,
@@ -161,7 +161,7 @@ export default function App() {
     setIsGenerating(true);
 
     try {
-      const response = await fetch('/api/chat', {
+      const response = await fetch('/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -169,12 +169,12 @@ export default function App() {
           trip: trip,
           demoCase: activeDemo,
           history: updatedHist.slice(-6, -1), // Send recent context history
-          forceMock: !isAiConnected // Flag to use server-side mock if toggled
+          forceMock: !isAiConnected // Use local mock when Live AI is off.
         })
       });
 
       if (!response.ok) {
-        throw new Error('API server fetch returned failure status');
+        throw new Error('Local chat server returned failure status');
       }
 
       const data = await response.json();
@@ -188,7 +188,7 @@ export default function App() {
 
       setMessages(prev => [...prev, assistantMsg]);
     } catch (err: any) {
-      console.error('Error contacting chat endpoint:', err);
+      console.error('Error contacting local chat route:', err);
       
       // Fallback response inside client
       const fallbackMsg: Message = {

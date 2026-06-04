@@ -1,19 +1,24 @@
 import os
-import sys
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from typing import List, Optional, Dict, Any
+from typing import Any, List, Optional
 from google import genai
 from google.genai import types
 from dotenv import load_dotenv
 
-# Load environment variables
-load_dotenv()
+try:
+    from tools import PHU_QUOC_HOTELS_DB, fetch_matching_hotels
+except ImportError:
+    from backend.tools import PHU_QUOC_HOTELS_DB, fetch_matching_hotels
 
-# Add parent directory to sys.path to import data_hotel
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from data_hotel import PHU_QUOC_HOTELS_DB
+
+BACKEND_DIR = os.path.dirname(os.path.abspath(__file__))
+PROJECT_ROOT = os.path.dirname(BACKEND_DIR)
+
+# Load backend/.env first, then allow a root .env fallback for local development.
+load_dotenv(os.path.join(BACKEND_DIR, ".env"))
+load_dotenv(os.path.join(PROJECT_ROOT, ".env"))
 
 app = FastAPI(title="Voyage Intelligence API Backend")
 
@@ -47,6 +52,59 @@ class ChatRequest(BaseModel):
     demoCase: str
     history: List[Message]
     forceMock: Optional[bool] = False
+
+
+def load_system_prompt() -> str:
+    prompt_path = os.path.join(PROJECT_ROOT, "system_promts.txt")
+    if os.path.exists(prompt_path):
+        with open(prompt_path, "r", encoding="utf-8") as file:
+            return file.read().strip()
+    return "You are AI Hotel Advisor, a helpful hotel recommendation assistant."
+
+
+def format_budget(budget_val: int) -> str:
+    if budget_val <= 0:
+        return "Chưa nhập hạn mức chi phí"
+    return f"{budget_val / 1000:.1f}M VND/đêm".replace(".0", "")
+
+
+def infer_budget_tier(trip: TripInfo) -> str:
+    budget_vnd = trip.budgetVal * 1000
+    if budget_vnd <= 0:
+        return "Chưa rõ"
+    if budget_vnd >= 3_500_000:
+        return "Cao cấp"
+    if budget_vnd >= 1_500_000:
+        return "Tầm trung"
+    return "Tiết kiệm"
+
+
+def build_runtime_context(req: ChatRequest) -> str:
+    trip = req.trip
+    return (
+        f"\n\n# RUNTIME CONTEXT\n"
+        f"- Destination: {trip.destination or 'Chưa xác định'}\n"
+        f"- Budget: {format_budget(trip.budgetVal)}\n"
+        f"- Inferred budget_tier: {infer_budget_tier(trip)}\n"
+        f"- Guests: {trip.guests}\n"
+        f"- Travel style: {trip.travelStyle or 'Chưa nhập'}\n"
+        f"- Preference: {trip.preference or 'Chưa nhập'}\n"
+        f"- Active demo case: {req.demoCase or 'normal'}\n"
+    )
+
+
+def text_part(text: str) -> types.Part:
+    return types.Part.from_text(text=text)
+
+
+def tool_call_args(args: Any) -> dict:
+    if args is None:
+        return {}
+    if isinstance(args, dict):
+        return args
+    if hasattr(args, "items"):
+        return dict(args.items())
+    return {}
 
 # Image mapping for hotels based on ID to maintain rich aesthetics
 def get_hotel_image(hotel_id: str) -> str:
@@ -294,76 +352,79 @@ def get_matched_hotels(trip: TripInfo):
 
 @app.post("/api/chat")
 async def chat_handler(req: ChatRequest):
-    message = req.message
-    trip = req.trip
-    demo_case = req.demoCase
-    history = req.history
-    force_mock = req.forceMock
-    
-    if force_mock:
-        reply_text = get_simulated_response(message, trip, demo_case)
+    if req.forceMock:
+        reply_text = get_simulated_response(req.message, req.trip, req.demoCase)
         return {"text": reply_text, "simulated": True}
-        
+
     api_key = os.environ.get("GEMINI_API_KEY")
     if not api_key or api_key == "MY_GEMINI_API_KEY":
         # Fallback to simulated offline response if key is missing/placeholder
-        reply_text = get_simulated_response(message, trip, demo_case)
+        reply_text = get_simulated_response(req.message, req.trip, req.demoCase)
         return {"text": reply_text, "simulated": True, "warning": "GEMINI_API_KEY is not configured, running in mock mode"}
-        
+
     try:
-        # Initialize Google GenAI client (using the new client SDK)
         client = genai.Client(api_key=api_key)
-        
-        # Build System Prompt
-        budget_str = f"{(trip.budgetVal / 1000).toFixed(1)}M VND/đêm" if trip.budgetVal > 0 else "Chưa nhập hạn mức chi phí"
-        system_instruction = f"""You are "Voyage Intelligence", a high-end digital travel concierge and AI Hotel Advisor for luxury, eco and boutique resorts in Vietnam (Phú Quốc, Nha Trang, Đà Nẵng, etc.).
-Your goal is to guide travelers in planning their trips, looking up hotels, and recommending suitable options.
+        system_instruction = load_system_prompt() + build_runtime_context(req)
 
-Presently, the user's trip itinerary consists of:
-- Điểm đến (Destination): {trip.destination or 'Chưa xác định'}
-- Ngân sách (Budget): {budget_str}
-- Số người (Guests): {trip.guests} người
-- Phong cách du lịch (Travel Style): {trip.travelStyle or 'Chưa nhập'}
-- Sở thích quan tâm (Preference): {trip.preference or 'Chưa nhập'}
-
-Active Demo Case Context: {demo_case or 'normal'}
-
-Our Registry Databank has 4 properties:
-1. SOL by Meliá Phu Quoc (1.8M VND/đêm, match 95%, tag: Tầm trung, Hồ bơi sát biển, Yoga bãi biển)
-2. Lahana Resort Phu Quoc & Spa (1.6M VND/đêm, match 90%, tag: Eco-Friendly, Hồ bơi vô cực, Nhà hàng độc bản)
-3. InterContinental Phu Quoc Long Beach Resort (4.2M VND/đêm, match 85%, tag: Sang trọng, Bãi biển riêng, Spa & Wellness)
-4. Novotel Phu Quoc Resort (2.1M VND/đêm, match 82%, tag: Gia đình, Hồ bơi ngoài trời, Sát biển bãi Trường)
-
-Guidelines:
-1. Respond fully in natural, elite, helpful Vietnamese (Tiếng Việt thanh lịch, chuẩn mực, hiếu khách).
-2. Read the user's input, the current trip summary details above, and relate your answer directly to our databank.
-3. If "demoCase" is "low_confidence", highlight the explicit contradiction between budget limit and luxurious requests (e.g., trying to book a 5-star resort with 800k VND) and suggest compromises.
-4. If "demoCase" is "error", politely instruct them to fill in the destination and budget on the left card so you can parse exact rates.
-5. Limit responses to 2-3 clean, compact paragraphs with bold highlights (using **). Do not write extremely long reports. Keep explanations friendly."""
-
-        # Format history
         contents = []
-        for msg in history[-6:]: # send last 6 messages
+        for msg in req.history[-6:]:
             role = "user" if msg.sender == "user" else "model"
-            contents.append(types.Content(role=role, parts=[types.Part.from_text(msg.text)]))
-            
-        # Add current message
-        contents.append(types.Content(role="user", parts=[types.Part.from_text(message)]))
-        
-        response = client.models.generate_content(
-            model="gemini-3.5-flash",
-            contents=contents,
-            config=types.GenerateContentConfig(
-                system_instruction=system_instruction,
-                temperature=0.75,
-            )
+            contents.append(types.Content(role=role, parts=[text_part(msg.text)]))
+
+        contents.append(types.Content(role="user", parts=[text_part(req.message)]))
+
+        model_name = os.environ.get("GEMINI_MODEL", "gemini-2.5-flash")
+        config = types.GenerateContentConfig(
+            system_instruction=system_instruction,
+            temperature=0.7,
+            tools=[fetch_matching_hotels],
         )
-        
+
+        response = client.models.generate_content(
+            model=model_name,
+            contents=contents,
+            config=config,
+        )
+
+        if response.function_calls:
+            contents.append(response.candidates[0].content)
+
+            for call in response.function_calls:
+                if call.name != "fetch_matching_hotels":
+                    continue
+
+                args = tool_call_args(call.args)
+                result_data = fetch_matching_hotels(
+                    travel_purpose=args.get("travel_purpose", req.trip.travelStyle or "Chưa rõ"),
+                    budget_tier=args.get("budget_tier", infer_budget_tier(req.trip)),
+                    area=args.get("area", "Chưa rõ"),
+                    key_requirements=args.get("key_requirements", [req.trip.preference] if req.trip.preference else []),
+                )
+
+                contents.append(
+                    types.Content(
+                        role="tool",
+                        parts=[
+                            types.Part.from_function_response(
+                                name=call.name,
+                                response={"result": result_data},
+                            )
+                        ],
+                    )
+                )
+
+            final_response = client.models.generate_content(
+                model=model_name,
+                contents=contents,
+                config=config,
+            )
+            return {"text": final_response.text or "", "simulated": False}
+
         return {"text": response.text or "", "simulated": False}
-        
+
     except Exception as e:
         # Fallback to simulated offline response in case of API failure
-        fallback_text = get_simulated_response(message, trip, demo_case)
+        fallback_text = get_simulated_response(req.message, req.trip, req.demoCase)
         return {
             "text": f"{fallback_text}\n\n*(Lưu ý: Đã kích hoạt bộ chuyển đổi thông minh dự phòng do API đang tải: {str(e)})*",
             "simulated": True,

@@ -207,7 +207,7 @@ export default function Sidebar({
               {isAiConnected ? (
                 <>
                   <Wifi className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
-                  <span>Kênh API thật trực tiếp bảo mật qua Server.</span>
+                  <span>Luồng Gemini chạy qua server local.</span>
                 </>
               ) : (
                 <>

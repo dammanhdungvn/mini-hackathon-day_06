@@ -1,9 +1,9 @@
 import express from 'express';
+import fs from 'fs';
 import path from 'path';
 import dotenv from 'dotenv';
 import { createServer as createViteServer } from 'vite';
 import { GoogleGenAI } from '@google/genai';
-import { execSync } from 'child_process';
 
 // Load environment variables
 dotenv.config();
@@ -127,21 +127,36 @@ function getAiClient(): GoogleGenAI {
   return aiClient;
 }
 
-// Read data_hotel.py directly and load hotel database
-function getHotelsFromPythonDirectly(): any[] {
+function getProjectRoot(): string {
+  return path.basename(process.cwd()) === 'web'
+    ? path.resolve(process.cwd(), '..')
+    : process.cwd();
+}
+
+// Read data_hotel.py directly so the demo does not need a separate Python API.
+function getHotelsFromDataFile(): any[] {
   try {
-    const rootPath = path.resolve(__dirname, '..');
-    // Run python script using sys.path inclusion to get PHU_QUOC_HOTELS_DB as JSON string
-    const cmd = `python -c "import json; import sys; sys.path.append('${rootPath.replace(/\\/g, '/')}'); from data_hotel import PHU_QUOC_HOTELS_DB; print(json.dumps(PHU_QUOC_HOTELS_DB))"`;
-    const stdout = execSync(cmd, { cwd: rootPath, encoding: 'utf-8' });
-    return JSON.parse(stdout);
+    const dataPath = path.join(getProjectRoot(), 'data_hotel.py');
+    const fileText = fs.readFileSync(dataPath, 'utf-8');
+    const assignmentIndex = fileText.indexOf('=');
+    if (assignmentIndex === -1) return [];
+
+    const pythonLiteral = fileText
+      .slice(assignmentIndex + 1)
+      .split('\n')
+      .filter(line => !line.trim().startsWith('#'))
+      .join('\n')
+      .replace(/,\s*([}\]])/g, '$1')
+      .trim();
+
+    return JSON.parse(pythonLiteral);
   } catch (err) {
-    console.error("Failed to read hotels from data_hotel.py directly via python:", err);
+    console.error("Failed to read hotels from data_hotel.py:", err);
     return [];
   }
 }
 
-// Local JS fallback matching algorithm to ensure everything works if Python FastAPI is offline
+// Local matching algorithm for the integrated demo server.
 function mapAndMatchHotels(hotels: any[], trip: any): any[] {
   const destination = (trip.destination || '').toLowerCase().trim();
   if (!destination) return [];
@@ -263,41 +278,15 @@ async function startServer() {
   // Body parser configurations
   app.use(express.json());
 
-  // API handler for Demo Cases - Try FastAPI first, fallback to LOCAL_DEMO_CASES
-  app.get('/api/demo-cases', async (req, res) => {
-    try {
-      const response = await fetch('http://localhost:8000/api/demo-cases', {
-        signal: AbortSignal.timeout(1000)
-      });
-      if (response.ok) {
-        const data = await response.json();
-        return res.json(data);
-      }
-    } catch (err) {
-      console.warn('FastAPI server /api/demo-cases connection failed, using local fallback cases');
-    }
+  // Local route for demo scenarios.
+  app.get('/demo-cases', (req, res) => {
     return res.json(LOCAL_DEMO_CASES);
   });
 
-  // API handler for Hotels List - Try FastAPI first, fallback to local mapAndMatchHotels using python output
-  app.post('/api/hotels', async (req, res) => {
+  // Local route for hotel matching.
+  app.post('/hotels', (req, res) => {
     try {
-      const response = await fetch('http://localhost:8000/api/hotels', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(req.body),
-        signal: AbortSignal.timeout(1000)
-      });
-      if (response.ok) {
-        const data = await response.json();
-        return res.json(data);
-      }
-    } catch (err) {
-      console.warn('FastAPI server /api/hotels connection failed, falling back to direct Python parsing');
-    }
-
-    try {
-      const rawHotels = getHotelsFromPythonDirectly();
+      const rawHotels = getHotelsFromDataFile();
       const trip = req.body;
       const matched = mapAndMatchHotels(rawHotels, trip);
       return res.json(matched);
@@ -307,24 +296,8 @@ async function startServer() {
     }
   });
 
-  // API handler for Chat requests - Try FastAPI first, fallback to local Gemini or Simulated solver
-  app.post('/api/chat', async (req, res) => {
-    try {
-      const response = await fetch('http://localhost:8000/api/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(req.body),
-        signal: AbortSignal.timeout(3000) // longer timeout for generative AI
-      });
-      if (response.ok) {
-        const data = await response.json();
-        return res.json(data);
-      }
-    } catch (err) {
-      console.warn('FastAPI server /api/chat connection failed, falling back to local chat solver');
-    }
-
-    // Local chat execution fallback
+  // Local route for chat execution: mock first, Gemini only when explicitly enabled.
+  app.post('/chat', async (req, res) => {
     try {
       const { message, trip, demoCase, history } = req.body;
 
@@ -332,7 +305,7 @@ async function startServer() {
         return res.status(400).json({ error: 'Message payload is required' });
       }
 
-      // Check if user has toggled simulating mock replies or real API
+      // Check if user has toggled simulated replies or live Gemini.
       const forceMock = req.body.forceMock === true;
 
       if (forceMock) {
@@ -404,10 +377,10 @@ Guidelines:
         });
 
       } catch (sdkError: any) {
-        console.warn('API error or missing credentials, falling back to smart simulated solver:', sdkError.message);
+        console.warn('Gemini error or missing credentials, falling back to smart simulated solver:', sdkError.message);
         const fallbackText = getSimulatedResponse(message, trip, demoCase);
         return res.json({ 
-          text: `${fallbackText}\n\n*(Lưu ý: Đã kích hoạt bộ chuyển đổi thông minh dự phòng do API đang tải)*`,
+          text: `${fallbackText}\n\n*(Lưu ý: Đã kích hoạt bộ chuyển đổi thông minh dự phòng do Gemini chưa sẵn sàng)*`,
           simulated: true,
           error: sdkError.message 
         });
@@ -419,8 +392,8 @@ Guidelines:
     }
   });
 
-  // Health endpoint checks
-  app.get('/api/health', (req, res) => {
+  // Local health check.
+  app.get('/health', (req, res) => {
     res.json({ status: 'ok', time: new Date().toISOString() });
   });
 
